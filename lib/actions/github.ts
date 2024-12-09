@@ -1,16 +1,31 @@
 "use server";
-import { cookies } from "next/headers";
 import { Octokit } from "octokit";
+import { auth } from "@/auth"
 
-const cookieConfig = async () => {
-  let cookieStore: unknown = null;
-};
+
+
+const wrappedKit = (() => {
+  let octokit: Octokit;
+  return async () => {
+    if (octokit) {
+      return octokit;
+    }
+    const session = await auth();
+    octokit = new Octokit({
+      auth: (session as any)?.accessToken || "" as string
+    });
+    return octokit;
+
+  };
+})();
+
 
 export async function getUser() {
-  const cookieStore = await cookies();
-  const octokit = new Octokit({
-    token: cookieStore.get("token")?.value
-  });
+  return await (await wrappedKit()).request("GET /user");
+}
 
-  return await octokit.request("GET /user");
+
+
+export async function getStarList() {
+  return await (await wrappedKit()).request("GET /user/starred");
 }
