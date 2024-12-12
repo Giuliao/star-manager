@@ -26,6 +26,8 @@ export async function getUser() {
 
 
 
-export async function getStarList() {
-  return await (await wrappedKit()).request("GET /user/starred");
+export async function getStarList(param: any = { per_page: 20, page: 1 }) {
+  return await (await wrappedKit()).request("GET /user/starred", {
+    ...(param || {}),
+  });
 }
