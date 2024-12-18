@@ -4,29 +4,29 @@ import {
   ResizablePanelGroup
 } from "@/components/ui/resizable";
 import { DynamicPanel } from "@/components/dynamic-panel";
+import { AppSidebar } from "@/components/app-sidebar";
 import { StarList } from "./_components/star-list";
+
 
 export default async function Console() {
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between">
+    <main className="flex-1 flex min-h-screen flex-col items-center justify-between">
       <DynamicPanel />
       <ResizablePanelGroup
         direction="horizontal"
-        className="rounded-lg border flex-1">
-        <ResizablePanel defaultSize={20}>
-          <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Tags</span>
-          </div>
+        className="flex-1">
+        <ResizablePanel defaultSize={30} className="relative">
+          <AppSidebar />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={80}>
+        <ResizablePanel defaultSize={70}>
           <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={30}>
+            <ResizablePanel defaultSize={40}>
               <StarList />
             </ResizablePanel>
             <ResizableHandle />
-            <ResizablePanel defaultSize={70}>
+            <ResizablePanel defaultSize={60}>
               <div className="grid grid-cols-4 h-full p-4 gap-4">
               </div>
             </ResizablePanel>

@@ -8,12 +8,17 @@ export function DynamicPanel() {
   useEffect(() => {
     const keydownHandler = (event: KeyboardEvent) => {
       if (event.key === ' ') {
+        event?.preventDefault();
+        event?.stopPropagation();
         setShowPanel((prev) => !prev);
       }
 
       if (event.key === 'Escape') {
+        event?.preventDefault();
+        event?.stopPropagation();
         setShowPanel(false);
       }
+
     }
 
     document.addEventListener("keydown", keydownHandler);
@@ -25,7 +30,7 @@ export function DynamicPanel() {
 
   return (
     <Card className={cn(
-      "w-[calc(100%-2rem)] bg-gray-200/30 backdrop-blur-sm mx-10 h-80 absolute bottom-4 z-10 p-4 animate-in fade-in duration-500",
+      "w-[calc(100%-2rem)] bg-gray-200/30 backdrop-blur-sm mx-10 h-80 absolute bottom-4 z-15 p-4 animate-in fade-in duration-500",
       showPanel ? "visible" : "hidden"
     )}>
       which key

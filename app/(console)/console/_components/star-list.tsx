@@ -46,7 +46,7 @@ export function StarList({ className }: Props) {
   }, [newData]);
 
   return (
-    <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-[99vh] overflow-y-auto", className)}>
+    <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen overflow-y-auto", className)}>
       <div className="flex gap-2 justify-start w-full items-center">
         <Input className="flex-1" onChange={(evt) => setSearchStr(evt?.target?.value as string)} />
         <Button className="outline" size="icon">
