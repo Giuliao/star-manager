@@ -21,7 +21,7 @@ const PreComp = (props: any) => {
         )}
       ></pre>
       {isSecureCtx && (
-        <div className="absolute right-10 w-6 h-6 p-1 shadow-sm top-1/3 cursor-pointer bg-white hidden group-hover:block active:animate-jump hover:shadow-md">
+        <div className="absolute right-2 w-6 h-6 p-1 shadow-sm top-2 cursor-pointer bg-white hidden group-hover:block active:animate-jump hover:shadow-md">
           {showCopied ? (
             <Check className="w-full h-full text-green-700" />
           ) : (
