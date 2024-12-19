@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { Search } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { getStarList } from "@/lib/actions/github";
 import type { StarItem } from "@/types/github";
 import { useQueryAllData } from "@/lib/hooks/query";
+import { useStarCtx } from "@/lib/context/star";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
@@ -20,7 +22,9 @@ export function StarList({ className }: Props) {
   const [starList, setStarList] = useState<StarItem[]>([]);
   const [searchStr, setSearchStr] = useState("");
   const [pending, startTransition] = useTransition();
-
+  const [selectedStar, setSelectedStar] = useState<StarItem>();
+  const [ctx, setCtx] = useStarCtx();
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -45,6 +49,15 @@ export function StarList({ className }: Props) {
     });
   }, [newData]);
 
+
+  const onClick = (item: StarItem) => {
+    setSelectedStar(item);
+    document.cookie = `owner=${item.owner.login};path=/`;
+    document.cookie = `repo=${item.name};path=/`;
+    router.refresh();
+    setCtx(prevCtx => ({ ...prevCtx, selectedStar: item }));
+  };
+
   return (
     <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen overflow-y-auto", className)}>
       <div className="flex gap-2 justify-start w-full items-center">
@@ -55,8 +68,15 @@ export function StarList({ className }: Props) {
       </div>
       {
         starList.filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
-          return <Card className={cn("w-full p-2 hover:border-solid hover:border-l-sky-500 hover:cursor-pointer")} key={index} >
-            <div className="flex gap-1 flex-start text-sm">
+          return <Card
+            className={cn(
+              "w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
+              selectedStar?.name === item.name && selectedStar.owner.login === item.owner.login ? "border-2 border-blue-300 hover:border-blue-300" : ""
+            )}
+            onClick={() => onClick(item)}
+            key={index}
+          >
+            <div className="flex gap-1 flex-start text-sm break-all">
               <Link href={item.owner.html_url} className="hover:underline" target="_blank">
                 {item.owner.login}
               </Link>

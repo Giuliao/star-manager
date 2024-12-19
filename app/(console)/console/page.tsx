@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -6,12 +7,12 @@ import {
 import { DynamicPanel } from "@/components/dynamic-panel";
 import { AppSidebar } from "@/components/app-sidebar";
 import { StarList } from "./_components/star-list";
-
+import { StarContent } from "./_components/star-content";
 
 export default async function Console() {
 
   return (
-    <main className="flex-1 flex min-h-screen flex-col items-center justify-between">
+    <main className="flex-1 flex min-h-screen w-screen flex-col items-center justify-between">
       <DynamicPanel />
       <ResizablePanelGroup
         direction="horizontal"
@@ -27,8 +28,9 @@ export default async function Console() {
             </ResizablePanel>
             <ResizableHandle />
             <ResizablePanel defaultSize={60}>
-              <div className="grid grid-cols-4 h-full p-4 gap-4">
-              </div>
+              <Suspense fallback={<div>Loading...</div>}>
+                <StarContent />
+              </Suspense>
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
