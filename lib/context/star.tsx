@@ -1,9 +1,9 @@
 "use client";
 import { createContext, useState, useContext } from "react";
-
+import type { NavItem } from "@/components/nav-sidebar";
 
 interface StarContextType {
-  tagList: string[];
+  tagList: NavItem[];
   selectedStar: any;
 }
 

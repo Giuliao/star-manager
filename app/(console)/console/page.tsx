@@ -5,7 +5,7 @@ import {
   ResizablePanelGroup
 } from "@/components/ui/resizable";
 import { DynamicPanel } from "@/components/dynamic-panel";
-import { AppSidebar } from "@/components/app-sidebar";
+import { TagSidebar } from "@/components/tag-sidebar";
 import { StarList } from "./_components/star-list";
 import { StarContent } from "./_components/star-content";
 
@@ -18,7 +18,7 @@ export default async function Console() {
         direction="horizontal"
         className="flex-1">
         <ResizablePanel defaultSize={30} className="relative">
-          <AppSidebar />
+          <TagSidebar />
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={70}>
@@ -28,7 +28,7 @@ export default async function Console() {
             </ResizablePanel>
             <ResizableHandle />
             <ResizablePanel defaultSize={60}>
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<div className="p-4">Loading...</div>}>
                 <StarContent />
               </Suspense>
             </ResizablePanel>

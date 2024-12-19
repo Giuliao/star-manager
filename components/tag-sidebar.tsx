@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus
 } from "lucide-react"
@@ -11,9 +11,16 @@ import {
 } from "@/components/ui/sidebar"
 import { NavSidebar, type NavItem } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
+import { useStarCtx } from "@/lib/context/star";
 
-export function AppSidebar() {
+export function TagSidebar() {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const [, setStarCtx] = useStarCtx()
+
+  useEffect(() => {
+    setStarCtx(prev => ({ ...prev, tagList: navItems }));
+  }, [navItems])
+
   return (
     <Sidebar className="absolute w-full">
       <SidebarContent>

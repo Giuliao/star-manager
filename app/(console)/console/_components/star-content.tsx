@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cookies } from 'next/headers';
@@ -11,7 +12,7 @@ import { getREADME } from '@/lib/actions/github';
 import { cn } from "@/lib/utils";
 import { PreComp } from "@/components/pre-comp";
 
-export async function StarContent({ }: any) {
+export async function StarContent() {
   const cookieStore = await cookies();
   const owner = cookieStore.get("owner")?.value;
   const repo = cookieStore.get("repo")?.value;

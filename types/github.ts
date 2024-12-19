@@ -1,3 +1,7 @@
+export type FlatTagType = {
+  name: string;
+}
+
 
 export type StarItem = {
   name: string;
@@ -7,5 +11,6 @@ export type StarItem = {
     html_url: string;
   };
   description: string;
+  tags?: FlatTagType[];
   [props: string]: any;
 }
