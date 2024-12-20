@@ -1,5 +1,4 @@
 import { Buffer } from "node:buffer";
-import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cookies } from 'next/headers';

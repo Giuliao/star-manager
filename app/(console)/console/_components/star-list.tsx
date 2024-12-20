@@ -62,7 +62,8 @@ export function StarList({ className }: Props) {
   };
 
 
-  const onAddTag = (item: FlatTagType, idx: number) => {
+  const onAddTag = (item: FlatTagType, starItem: StarItem) => {
+    const idx = starList.findIndex((item) => item.id === starItem.id);
     if (starList[idx].tags?.some((tag) => tag.name === item.name)) {
       return;
     }
@@ -112,7 +113,7 @@ export function StarList({ className }: Props) {
                   </div>
                 ))
               }
-              <TagPopover tagList={tagList as FlatTagType[]} onAdd={(item) => onAddTag(item, index)}>
+              <TagPopover tagList={tagList as FlatTagType[]} onAdd={(tag) => onAddTag(tag, item)}>
                 <Button variant="outline" className="w-5 h-5 p-1 bg-gray-300 active:animate-ping">
                   <Hash className="bg-gray-200" />
                 </Button>
