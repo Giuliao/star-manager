@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -10,6 +11,9 @@ import { StarList } from "./_components/star-list";
 import { StarContent } from "./_components/star-content";
 
 export default async function Console() {
+  const cookieStore = await cookies();
+  const owner = cookieStore.get("owner")?.value;
+  const repo = cookieStore.get("repo")?.value;
 
   return (
     <main className="flex-1 flex min-h-screen w-screen flex-col items-center justify-between">
@@ -28,7 +32,7 @@ export default async function Console() {
             </ResizablePanel>
             <ResizableHandle />
             <ResizablePanel defaultSize={60}>
-              <Suspense fallback={<div className="p-4">Loading...</div>}>
+              <Suspense key={`${owner}-${repo}`} fallback={<div className="p-4">Loading...</div>}>
                 <StarContent />
               </Suspense>
             </ResizablePanel>
