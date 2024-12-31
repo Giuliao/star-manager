@@ -12,8 +12,14 @@ import {
 import { NavSidebar, type NavItem } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
 import { useStarCtx } from "@/lib/context/star";
+import { createUserTag, createTag, queryTagByName } from "@/lib/actions/tag";
+import type { SessionUser } from "@/types/user";
 
-export function TagSidebar() {
+type Props = React.HTMLAttributes<HTMLDivElement> & {
+  sessionUser: SessionUser;
+}
+
+export function TagSidebar({ sessionUser }: Props) {
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [, setStarCtx] = useStarCtx()
 
@@ -21,17 +27,51 @@ export function TagSidebar() {
     setStarCtx(prev => ({ ...prev, tagList: navItems }));
   }, [navItems])
 
+
+  const onAddRootTag = async (name: string) => {
+    setNavItems(prev => {
+      return [...prev, { title: name || "new tag", url: "" }] as NavItem[];
+    });
+
+    let tag = await queryTagByName(name);
+    if (!tag) {
+      tag = (await createTag({
+        name: name
+      }))?.[0];
+    }
+
+    await createUserTag({
+      user_id: sessionUser.dbId,
+      tag_id: tag.id,
+      content: [],
+    });
+
+  }
+
+  const onAddTag = async (item: NavItem, indices: number[], idx: number) => {
+    setNavItems(prev => {
+      if (indices.length === 0) {
+        prev[idx] = item;
+      } else {
+        indices.reduce((acc, cur, idx) => {
+          if (idx === indices.length - 1) {
+            acc![cur] = item;
+            return acc
+          }
+          return acc![cur]?.items;
+        }, prev[idx].items);
+      };
+      return [...prev];
+    });
+  }
+
   return (
     <Sidebar className="absolute w-full">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">
             Tags
-            <NavPopover onAdd={(name) => {
-              setNavItems(prev => {
-                return [...prev, { title: name || "new tag", url: "" }] as NavItem[];
-              });
-            }} >
+            <NavPopover onAdd={onAddRootTag} >
               <Plus className="ml-2 invisible group-hover/label:visible hover:cursor-pointer active:animate-ping" />
             </NavPopover>
           </SidebarGroupLabel>
@@ -39,20 +79,7 @@ export function TagSidebar() {
             navItems.map((item, idx) => (
               <NavSidebar item={item} key={idx} indices={[]}
                 onAddChange={(item, indices) => {
-                  setNavItems(prev => {
-                    if (indices.length === 0) {
-                      prev[idx] = item;
-                    } else {
-                      indices.reduce((acc, cur, idx) => {
-                        if (idx === indices.length - 1) {
-                          acc![cur] = item;
-                          return acc
-                        }
-                        return acc![cur]?.items;
-                      }, prev[idx].items);
-                    };
-                    return [...prev];
-                  });
+                  onAddTag(item, indices, idx);
                 }}
                 onDeleteChange={(_, indices) => {
                   setNavItems(prev => {
