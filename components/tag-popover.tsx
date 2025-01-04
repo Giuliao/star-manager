@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
   PopoverArrow,
 } from "@/components/ui/popover";
-import type { FlatTagType } from "@/types/github";
+import type { FlatTagType } from "@/types/tag";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAdd?: (name: FlatTagType) => void;
@@ -29,7 +29,7 @@ export function TagPopover({ children, onAdd, tagList }: Props) {
         {children}
       </PopoverTrigger>
       <PopoverContent
-        className="max-w-40 max-h-[50vh]"
+        className="max-w-40 max-h-[50vh] p-2 py-1"
         align="start"
         alignOffset={-20}
         onClick={(evt) => { evt.stopPropagation(); }}
@@ -37,7 +37,7 @@ export function TagPopover({ children, onAdd, tagList }: Props) {
         <div className="w-full h-full flex flex-col items-start justify-start overflow-y-auto gap-1">
           {
             tagList?.map((tag, i) => (
-              <span key={i} className="cursor-pointer hover:bg-accent w-full" onClick={() => onAddClick(tag)}>#{tag.name}</span>
+              <span key={i} className="cursor-pointer hover:bg-accent w-full text-sm" onClick={() => onAddClick(tag)}>#{tag.name}</span>
             ))
           }
         </div>

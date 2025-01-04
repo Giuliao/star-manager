@@ -1,17 +1,19 @@
 "use client";
 import { createContext, useState, useContext } from "react";
-import type { NavItem } from "@/components/nav-sidebar";
+import type { NavTagItem, FlatTagType } from "@/types/tag";
+import type { StarItem } from "@/types/github";
 
 interface StarContextType {
-  tagList: NavItem[];
-  selectedStar: any;
+  tagList: NavTagItem[];
+  selectedStar?: StarItem;
+  selectedTag?: FlatTagType;
+  isDeleteTag?: boolean;
 }
 
 
 const StarContext = createContext<[StarContextType, React.Dispatch<React.SetStateAction<StarContextType>>]>([
   {
     tagList: [],
-    selectedStar: null
   } as StarContextType,
   () => { },
 ]);
@@ -30,7 +32,6 @@ function useStarCtx() {
 const StarProvider = ({ children }: { children: React.ReactNode }) => {
   const [ctx, setCtx] = useState<StarContextType>({
     tagList: [],
-    selectedStar: null
   });
   return <StarContext.Provider value={[ctx, setCtx]}>{children}</StarContext.Provider>
 };

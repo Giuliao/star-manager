@@ -8,7 +8,7 @@ export async function createUser(data: CreateUserType, dbParam = db) {
   return dbParam.insert(users).values(data);
 }
 
-export async function getUserById(id: string, dbParam = db) {
+export async function getUserById(id: number, dbParam = db) {
   return dbParam.query.users.findFirst({ where: eq(users.id, id) });
 }
 

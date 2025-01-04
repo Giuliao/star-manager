@@ -9,36 +9,106 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar"
-import { NavSidebar, type NavItem } from "@/components/nav-sidebar";
+import { NavSidebar } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
 import { useStarCtx } from "@/lib/context/star";
-import { createUserTag, createTag, queryTagByName } from "@/lib/actions/tag";
+import {
+  createUserTag,
+  createTag,
+  queryTagByName,
+  updateUserTagById
+} from "@/lib/actions/tag";
 import type { SessionUser } from "@/types/user";
+import type { NavTagItem } from "@/types/tag";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   sessionUser: SessionUser;
+  initNavItems?: NavTagItem[];
 }
 
-export function TagSidebar({ sessionUser }: Props) {
-  const [navItems, setNavItems] = useState<NavItem[]>([]);
-  const [, setStarCtx] = useStarCtx()
+export function TagSidebar({ sessionUser, initNavItems }: Props) {
+  const [navItems, setNavItems] = useState<NavTagItem[]>(initNavItems || []);
+  const [starCtx, setStarCtx] = useStarCtx()
 
   useEffect(() => {
     setStarCtx(prev => ({ ...prev, tagList: navItems }));
   }, [navItems])
 
 
-  const onAddRootTag = async (name: string) => {
-    setNavItems(prev => {
-      return [...prev, { title: name || "new tag", url: "" }] as NavItem[];
-    });
+  useEffect(() => {
+    if (starCtx.selectedTag && starCtx.selectedStar) {
+      if (!starCtx.isDeleteTag && starCtx.selectedTag.item.content
+        ?.some(c => c === `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`)) {
+        return;
+      }
 
+      let tag = starCtx.selectedTag;
+      setNavItems(prev => {
+        let newNavItems = [...prev];
+        tag.indices.reduce((acc: NavTagItem[], cur: number, idx: number) => {
+          if (idx === tag.indices.length - 1) {
+            if (starCtx.isDeleteTag) {
+              acc[cur] = {
+                ...acc[cur],
+                content: [
+                  ...(acc[cur].content?.filter(c => c !== `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`
+                  ) || []),
+                ]
+              };
+            } else {
+              acc[cur] = {
+                ...acc[cur],
+                content: [
+                  ...(acc[cur].content || []),
+                  `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`
+                ]
+              };
+            }
+            return [];
+          }
+          acc[cur] = {
+            ...acc[cur],
+            items: [...(acc[cur].items || [])],
+          };
+          return acc[cur].items as NavTagItem[];
+        }, newNavItems);
+
+        return newNavItems;
+      })
+
+
+      // update database 
+      tag.indices.reduce((acc: NavTagItem[], cur: number, idx: number) => {
+        if (idx === tag.indices.length - 1) {
+          updateUserTagById(
+            sessionUser.dbId,
+            tag.item.id as number,
+            {
+              content: starCtx.isDeleteTag
+                ? acc[cur].content?.filter(c => c !== `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`)
+                : [...(acc[cur].content || []), `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`]
+            }
+          )
+          return [];
+        }
+        return acc[cur].items as NavTagItem[];
+      }, navItems);
+
+    }
+  }, [starCtx.selectedTag])
+
+
+  const onAddRootTag = async (name: string) => {
     let tag = await queryTagByName(name);
     if (!tag) {
       tag = (await createTag({
         name: name
       }))?.[0];
     }
+
+    setNavItems(prev => {
+      return [...prev, { title: name || "new tag", id: tag.id }] as NavTagItem[];
+    });
 
     await createUserTag({
       user_id: sessionUser.dbId,
@@ -48,7 +118,14 @@ export function TagSidebar({ sessionUser }: Props) {
 
   }
 
-  const onAddTag = async (item: NavItem, indices: number[], idx: number) => {
+  const onAddTag = async (item: NavTagItem, newItem: NavTagItem, indices: number[], idx: number) => {
+    let tag = await queryTagByName(newItem.title);
+    if (!tag) {
+      tag = (await createTag({
+        name: newItem.title
+      }))?.[0];
+    }
+
     setNavItems(prev => {
       if (indices.length === 0) {
         prev[idx] = item;
@@ -63,6 +140,14 @@ export function TagSidebar({ sessionUser }: Props) {
       };
       return [...prev];
     });
+
+    await createUserTag({
+      user_id: sessionUser.dbId,
+      tag_id: tag.id,
+      parent_tag_id: newItem.parentId,
+      content: [],
+    });
+
   }
 
   return (
@@ -78,8 +163,8 @@ export function TagSidebar({ sessionUser }: Props) {
           {
             navItems.map((item, idx) => (
               <NavSidebar item={item} key={idx} indices={[]}
-                onAddChange={(item, indices) => {
-                  onAddTag(item, indices, idx);
+                onAddChange={(item, newItem, indices) => {
+                  onAddTag(item, newItem, indices, idx);
                 }}
                 onDeleteChange={(_, indices) => {
                   setNavItems(prev => {
@@ -87,13 +172,13 @@ export function TagSidebar({ sessionUser }: Props) {
                       return prev.filter((_, i) => i !== idx);
                     }
                     const updatedItems = [...prev];
-                    updatedItems[idx] = { ...updatedItems[idx], items: [...updatedItems[idx].items as NavItem[]] };
+                    updatedItems[idx] = { ...updatedItems[idx], items: [...updatedItems[idx].items as NavTagItem[]] };
                     indices.reduce((acc, cur, i) => {
                       if (i === indices.length - 1) {
                         acc!.splice(cur, 1);
                         return acc
                       }
-                      acc![cur] = { ...acc![cur], items: [...acc![cur].items as NavItem[]] };
+                      acc![cur] = { ...acc![cur], items: [...acc![cur].items as NavTagItem[]] };
                       return acc![cur]?.items;
                     }, updatedItems[idx].items);
 
@@ -107,5 +192,23 @@ export function TagSidebar({ sessionUser }: Props) {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
+  )
+}
+
+
+export function TagSiderBarLoading() {
+  return (
+    <Sidebar className="absolute w-full">
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel className="group/label">
+            Tags
+          </SidebarGroupLabel>
+          loading...
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+
+
   )
 }

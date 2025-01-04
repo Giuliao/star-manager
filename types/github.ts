@@ -1,7 +1,4 @@
-export type FlatTagType = {
-  name: string;
-}
-
+import type { FlatTagType } from "./tag";
 
 export type StarItem = {
   name: string;

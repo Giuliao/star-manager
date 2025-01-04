@@ -1,5 +1,4 @@
 "use client";
-import { nanoid } from "nanoid";
 import {
   Plus,
   ChevronRight,
@@ -19,31 +18,22 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { NavPopover } from "@/components/nav-popover";
+import type { NavTagItem } from '@/types/tag';
 
-
-
-export interface NavItem {
-  id: string;
-  title: string;
-  url: string;
-  icon?: React.ComponentType<any>;
-  isActive?: boolean;
-  items?: NavItem[];
-}
 
 interface Props {
-  item: NavItem;
+  item: NavTagItem;
   indices: number[];
-  onAddChange?: (item: NavItem, indices: number[]) => void;
-  onDeleteChange?: (item: NavItem, indices: number[]) => void;
+  onAddChange?: (changedItem: NavTagItem, newItem: NavTagItem, indices: number[]) => void;
+  onDeleteChange?: (item: NavTagItem, indices: number[]) => void;
 }
 
 export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props) {
-  const onAddClick = (name: string, item: NavItem, indices: number[]) => {
+  const onAddClick = (name: string, item: NavTagItem, indices: number[]) => {
     const newItem = {
-      id: nanoid(10),
+      id: item.items?.length ? item.items.length : 0,
       title: name,
-      url: "",
+      parentId: item.id
     };
 
     if (item.items) {
@@ -52,9 +42,9 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
       item.items = [newItem];
     }
 
-    onAddChange?.(item, indices);
+    onAddChange?.(item, newItem, indices);
   }
-  const onDeleteClick = (event: React.MouseEvent<SVGElement>, item: NavItem, indices: number[]) => {
+  const onDeleteClick = (event: React.MouseEvent<SVGElement>, item: NavTagItem, indices: number[]) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -84,6 +74,7 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
                 className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
                 onClick={(evt) => onDeleteClick(evt, item, indices)}
               />
+              {item.content?.length ? <span className="float-right invisible group-hover/button:visible">{`${item.content.length}`}</span> : ''}
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -99,7 +90,7 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
                   />
                   : <SidebarMenuSubItem key={subItem.id} >
                     <SidebarMenuSubButton asChild>
-                      <div className="group/button">
+                      <div className="group/button cursor-pointer">
                         <span>{subItem.title}</span>
                         <NavPopover onAdd={(name) => onAddClick(name, subItem, [...indices, idx])}>
                           <Plus
@@ -111,6 +102,7 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
                           className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
                           onClick={(event) => onDeleteClick(event, subItem, [...indices, idx])}
                         />
+                        {subItem.content?.length ? <span className="float-right invisible group-hover/button:visible ">{`${subItem.content.length}`}</span> : ''}
                       </div>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>

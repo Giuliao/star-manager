@@ -31,10 +31,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async signIn({ user, profile }: any) {
       user.profileId = profile.id;
-      await import("@/db").then(async ({ db }) => {
-        const userInfo = await handleUserCreate({ ...user, profileId: profile.id }, db);
-        user.dbId = (userInfo as CreateUserType).id;
-      });
+      const { db } = await import("@/db");
+      const userInfo = await handleUserCreate({ ...user, profileId: profile.id }, db);
+      user.dbId = (userInfo as CreateUserType).id;
       return true;
     }
   }
@@ -50,11 +49,11 @@ async function handleUserCreate(user: SessionUser, db: DbType) {
   try {
     result = await db.query.users.findFirst({ where: eq(users.github_id, user.profileId as number) });
     if (!result) {
-      result = await db.insert(users).values({
+      result = (await db.insert(users).values({
         github_id: user.profileId as number,
         name: user.name,
         email: user.email,
-      }).returning();
+      }).returning())?.[0];
     }
   } catch (e) {
     console.error(e);

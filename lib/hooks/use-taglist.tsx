@@ -1,21 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useStarCtx } from "@/lib/context/star";
-import type { NavItem } from "@/components/nav-sidebar";
-import type { FlatTagType } from "@/types/github";
+import type { NavTagItem, FlatTagType } from "@/types/tag";
 
-export function parseNavItem(navitems: NavItem[], prefix: string = "") {
+export function parseNavItem(navitems: NavTagItem[], prefix: string = "", indices: number[] = []) {
   const results: FlatTagType[] = [];
-  for (let item of navitems) {
+  navitems.forEach((item, idx) => {
     const newPrefix = `${!prefix ? "" : `${prefix}/`}${item.title}`;
     results.push({
       name: newPrefix,
+      item: item,
+      indices: [...indices, idx]
     });
 
     if (item.items) {
-      results.push(...parseNavItem(item.items, newPrefix));
+      results.push(...parseNavItem(item.items, newPrefix, [...indices, idx]));
     }
-  }
+  })
   return results;
 }
 
