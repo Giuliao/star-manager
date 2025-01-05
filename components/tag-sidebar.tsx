@@ -16,10 +16,12 @@ import {
   createUserTag,
   createTag,
   queryTagByName,
-  updateUserTagById
+  updateUserTagById,
+  type CreateUserTagType,
 } from "@/lib/actions/tag";
 import type { SessionUser } from "@/types/user";
 import type { NavTagItem } from "@/types/tag";
+
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   sessionUser: SessionUser;
@@ -82,7 +84,7 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
         if (idx === tag.indices.length - 1) {
           updateUserTagById(
             sessionUser.dbId,
-            tag.item.id as number,
+            tag.item.id as string,
             {
               content: starCtx.isDeleteTag
                 ? acc[cur].content?.filter(c => c !== `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`)
@@ -105,16 +107,16 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
         name: name
       }))?.[0];
     }
-
-    setNavItems(prev => {
-      return [...prev, { title: name || "new tag", id: tag.id }] as NavTagItem[];
-    });
-
-    await createUserTag({
+    const result = (await createUserTag({
       user_id: sessionUser.dbId,
       tag_id: tag.id,
       content: [],
+    }))?.[0];
+
+    setNavItems(prev => {
+      return [...prev, { title: name || "new tag", id: result.id }] as NavTagItem[];
     });
+
 
   }
 
@@ -144,7 +146,8 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
     await createUserTag({
       user_id: sessionUser.dbId,
       tag_id: tag.id,
-      parent_tag_id: newItem.parentId,
+      parent_id: newItem.parentId,
+      parent_tag_id: newItem.parentTagId,
       content: [],
     });
 

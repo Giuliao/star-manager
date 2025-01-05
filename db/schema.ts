@@ -20,6 +20,8 @@ export const tags = mySchema.table('tags', {
 export type CreateTagType = typeof tags.$inferInsert;
 
 export const tagUserRelationTable = mySchema.table('tag_user_relations', {
+  id: text().primaryKey(),
+  parent_id: text(),
   tag_id: bigint({ mode: "number" }).references(() => tags.id, { onDelete: 'cascade' }).notNull(),
   user_id: bigint({ mode: "number" }).references(() => users.id, { onDelete: 'cascade' }).notNull(),
   parent_tag_id: bigint({ mode: "number" }),
@@ -30,6 +32,13 @@ export const tagparentRelation = relations(tagUserRelationTable, ({ one }) => ({
   parentTag: one(tags, {
     fields: [tagUserRelationTable.parent_tag_id],
     references: [tags.id],
+  })
+}));
+
+export const tagUserParentRelation = relations(tagUserRelationTable, ({ one }) => ({
+  parent: one(tagUserRelationTable, {
+    fields: [tagUserRelationTable.parent_id],
+    references: [tagUserRelationTable.id],
   })
 }));
 

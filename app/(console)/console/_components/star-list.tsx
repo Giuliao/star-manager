@@ -32,8 +32,9 @@ export function StarList({ className, initNavItems }: Props) {
 
   const initTagData = (item: StarItem) => {
     parsedTagList.forEach(tag => {
-      if (tag.item.content?.some(v => v === `${item.owner.login}/${item.name}`) && !item.tags?.some(t => t.name === tag.name)) {
+      if (tag.item.content?.some(v => v === `${item.owner.login}/${item.name}`)) {
         item.tags = [
+          ...(item.tags || []),
           tag
         ]
       }

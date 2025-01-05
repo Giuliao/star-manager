@@ -1,4 +1,5 @@
 "use server";
+import { v4 as uuidv4 } from 'uuid';
 import { eq, and } from "drizzle-orm";
 import { db } from '@/db';
 import {
@@ -16,10 +17,14 @@ export async function createTag(tag: CreateTagType) {
   return await db.insert(tags).values(tag).returning();
 }
 
-export async function createUserTag(param: TagUserRelationType) {
-  return await db.insert(tagUserRelationTable).values(param).returning();
+export async function createUserTag(param: Omit<TagUserRelationType, "id">) {
+  return await db.insert(tagUserRelationTable).values({
+    id: uuidv4(),
+    ...param
+  }).returning();
 }
 
+export type CreateUserTagType = Awaited<ReturnType<typeof createUserTag>>;
 
 export async function listUserTagById(id: number) {
   return await db.select().from(tagUserRelationTable)
@@ -30,8 +35,8 @@ export async function listUserTagById(id: number) {
 export type UserTagListType = Awaited<ReturnType<typeof listUserTagById>>;
 
 
-export async function updateUserTagById(userId: number, tagId: number, tag: Partial<TagUserRelationType>) {
+export async function updateUserTagById(userId: number, id: string, tag: Partial<TagUserRelationType>) {
   return await db.update(tagUserRelationTable)
     .set(tag)
-    .where(and(eq(tagUserRelationTable.tag_id, tagId), eq(tagUserRelationTable.user_id, userId))).returning();
+    .where(and(eq(tagUserRelationTable.id, id), eq(tagUserRelationTable.user_id, userId))).returning();
 }

@@ -1,6 +1,8 @@
 export type NavTagItem = {
-  id?: number;
-  parentId?: number;
+  tagId?: number;
+  parentTagId?: number;
+  parentId: string | null;
+  id?: string;
   title: string;
   icon?: React.ComponentType<any>;
   isActive?: boolean;
