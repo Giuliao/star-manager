@@ -40,3 +40,11 @@ export async function updateUserTagById(userId: number, id: string, tag: Partial
     .set(tag)
     .where(and(eq(tagUserRelationTable.id, id), eq(tagUserRelationTable.user_id, userId))).returning();
 }
+
+export async function deleteUserTagById(userId: number, id: string) {
+  return await db.delete(tagUserRelationTable)
+    .where(
+      and(eq(tagUserRelationTable.id, id), eq(tagUserRelationTable.user_id, userId))
+    )
+    .returning();
+}

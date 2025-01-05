@@ -8,6 +8,8 @@ interface StarContextType {
   selectedStar?: StarItem;
   selectedTag?: FlatTagType;
   isDeleteTag?: boolean;
+  deletedTag?: NavTagItem[];
+  selectedSidebarTag?: NavTagItem;
 }
 
 

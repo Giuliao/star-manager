@@ -26,14 +26,14 @@ interface Props {
   indices: number[];
   onAddChange?: (changedItem: NavTagItem, newItem: NavTagItem, indices: number[]) => void;
   onDeleteChange?: (item: NavTagItem, indices: number[]) => void;
+  onNavItemClick?: (item: NavTagItem, indices: number[]) => void;
 }
 
-export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props) {
+export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavItemClick }: Props) {
   const onAddClick = (name: string, item: NavTagItem, indices: number[]) => {
     const newItem = {
-      id: item.items?.length ? item.items.length : 0,
       title: name,
-      parentId: item.id
+      parentId: item.id as string
     };
 
     if (item.items) {
@@ -50,6 +50,10 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
 
     onDeleteChange?.(item, indices);
   }
+
+  const handleNavItemClick = (item: NavTagItem, indices: number[]) => {
+    onNavItemClick?.(item, indices);
+  }
   return (
     <SidebarMenu>
       <Collapsible
@@ -61,9 +65,9 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton tooltip={item.title} className="group/button">
-              <ChevronRight className="mr-2 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+              <ChevronRight className="mr-2 transition-transform duration-200 group-data-[state=open]/button:rotate-90" />
               {item.icon && <item.icon />}
-              <span>{item.title}</span>
+              <span className="cursor-pointer" onClick={() => handleNavItemClick(item, indices)}>{item.title}</span>
               <NavPopover onAdd={(name) => onAddClick(name, item, indices)}>
                 <Plus
                   className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
@@ -91,7 +95,7 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange }: Props
                   : <SidebarMenuSubItem key={subItem.id} >
                     <SidebarMenuSubButton asChild>
                       <div className="group/button cursor-pointer">
-                        <span>{subItem.title}</span>
+                        <span className="cursor-pointer" onClick={() => handleNavItemClick(subItem, [...indices, idx])}>{subItem.title}</span>
                         <NavPopover onAdd={(name) => onAddClick(name, subItem, [...indices, idx])}>
                           <Plus
                             className="invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"

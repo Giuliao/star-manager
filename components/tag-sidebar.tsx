@@ -17,7 +17,7 @@ import {
   createTag,
   queryTagByName,
   updateUserTagById,
-  type CreateUserTagType,
+  deleteUserTagById,
 } from "@/lib/actions/tag";
 import type { SessionUser } from "@/types/user";
 import type { NavTagItem } from "@/types/tag";
@@ -127,6 +127,14 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
         name: newItem.title
       }))?.[0];
     }
+    const result = (await createUserTag({
+      user_id: sessionUser.dbId,
+      tag_id: tag.id,
+      parent_id: newItem.parentId,
+      parent_tag_id: newItem.parentTagId,
+      content: [],
+    }))?.[0];
+    newItem.id = result.id;
 
     setNavItems(prev => {
       if (indices.length === 0) {
@@ -143,14 +151,55 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
       return [...prev];
     });
 
-    await createUserTag({
-      user_id: sessionUser.dbId,
-      tag_id: tag.id,
-      parent_id: newItem.parentId,
-      parent_tag_id: newItem.parentTagId,
-      content: [],
+  }
+  const onDeleteChange = (item: NavTagItem, indices: number[], idx: number) => {
+    setNavItems(prev => {
+      if (indices.length === 0) {
+        return prev.filter((_, i) => i !== idx);
+      }
+      const updatedItems = [...prev];
+      updatedItems[idx] = { ...updatedItems[idx], items: [...updatedItems[idx].items as NavTagItem[]] };
+      indices.reduce((acc, cur, i) => {
+        if (i === indices.length - 1) {
+          acc!.splice(cur, 1);
+          return acc
+        }
+        acc![cur] = { ...acc![cur], items: [...acc![cur].items as NavTagItem[]] };
+        return acc![cur]?.items;
+      }, updatedItems[idx].items);
+
+      return updatedItems;
     });
 
+
+    const getDeleteTag = (item: NavTagItem) => {
+      let result: NavTagItem[] = [item];
+      if (item.items && item.items.length > 0) {
+        result = [...result, ...item.items.map(getDeleteTag).flat()];
+      }
+      return result;
+    }
+
+    setStarCtx(prev => ({
+      ...prev,
+      deletedTag: getDeleteTag(item)
+    }));
+
+    // database action
+    deleteUserTagById(sessionUser.dbId, item.id as string);
+
+  }
+  const onNavItemClick = (item: NavTagItem, indices: number[]) => {
+    let prefix = '';
+    indices.reduce((acc: NavTagItem[], cur: number, idx: number) => {
+      if (idx === indices.length - 1) {
+        return []
+      }
+      prefix = `${prefix}${acc[cur].title}/`;
+      return acc[cur].items as NavTagItem[];
+    }, navItems);
+
+    setStarCtx((prev) => ({ ...prev, selectedSidebarTag: { ...item, title: `${prefix}${item.title}` } }));
   }
 
   return (
@@ -169,26 +218,8 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
                 onAddChange={(item, newItem, indices) => {
                   onAddTag(item, newItem, indices, idx);
                 }}
-                onDeleteChange={(_, indices) => {
-                  setNavItems(prev => {
-                    if (indices.length === 0) {
-                      return prev.filter((_, i) => i !== idx);
-                    }
-                    const updatedItems = [...prev];
-                    updatedItems[idx] = { ...updatedItems[idx], items: [...updatedItems[idx].items as NavTagItem[]] };
-                    indices.reduce((acc, cur, i) => {
-                      if (i === indices.length - 1) {
-                        acc!.splice(cur, 1);
-                        return acc
-                      }
-                      acc![cur] = { ...acc![cur], items: [...acc![cur].items as NavTagItem[]] };
-                      return acc![cur]?.items;
-                    }, updatedItems[idx].items);
-
-                    return updatedItems;
-
-                  });
-                }}
+                onDeleteChange={(item, indices) => { onDeleteChange(item, indices, idx) }}
+                onNavItemClick={(item, indices) => onNavItemClick(item, [idx, ...indices])}
               />
             ))
           }

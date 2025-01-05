@@ -14,6 +14,7 @@ import type { FlatTagType, NavTagItem } from "@/types/tag";
 import { useQueryAllData } from "@/lib/hooks/query";
 import { useStarCtx } from "@/lib/context/star";
 import { useTagList, parseNavItem } from "@/lib/hooks/use-taglist";
+import { SearchControl } from "./search-control";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
@@ -23,6 +24,7 @@ export function StarList({ className, initNavItems }: Props) {
 
   const [starList, setStarList] = useState<StarItem[]>([]);
   const [searchStr, setSearchStr] = useState("");
+  const [searchTag, setSearchTag] = useState<FlatTagType[]>([]);
   const [pending, startTransition] = useTransition();
   const [selectedStar, setSelectedStar] = useState<StarItem>();
   const [starCtx, setStarCtx] = useStarCtx();
@@ -65,6 +67,30 @@ export function StarList({ className, initNavItems }: Props) {
     });
   }, [newData]);
 
+  useEffect(() => {
+    if (starCtx.deletedTag) {
+      setStarList(prev => {
+        return prev.map((item) => {
+          let newItem = {
+            ...item
+          }
+          starCtx.deletedTag?.forEach((tag) => {
+            if (item.tags?.some(t => t.item.id === tag.id)) {
+              newItem = {
+                ...newItem,
+                tags: [
+
+                  ...item.tags.filter(t => t.item.id !== tag.id)
+                ]
+              };
+            }
+          })
+          return newItem;
+        })
+      })
+      setStarCtx(prevCtx => ({ ...prevCtx, deletedTag: undefined }));
+    }
+  }, [starCtx.deletedTag]);
 
   const onClick = (item: StarItem) => {
     if (starCtx.selectedStar?.name === item.name && starCtx.selectedStar.owner.login === item.owner.login) {
@@ -121,53 +147,53 @@ export function StarList({ className, initNavItems }: Props) {
 
 
   return (
-    <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen overflow-y-auto", className)}>
-      <div className="flex gap-2 justify-start w-full items-center">
-        <Input className="flex-1" onChange={(evt) => setSearchStr(evt?.target?.value as string)} />
-        <Button className="outline" size="icon">
-          <Search className="hover:cursor-pointer" />
-        </Button>
-      </div>
+    <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen relative overflow-y-auto", className)}>
+      <SearchControl
+        onTagChange={setSearchTag}
+        onInputChange={(evt) => setSearchStr(evt?.target?.value as string)} />
       {
-        starList.filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
-          return <Card
-            className={cn(
-              "rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
-              selectedStar?.name === item.name && selectedStar.owner.login === item.owner.login ? "border-2 border-blue-300 hover:border-blue-300" : ""
-            )}
-            onClick={() => onClick(item)}
-            key={index}
-          >
-            <div className="flex gap-1 flex-start text-sm break-all">
-              <Link href={item.owner.html_url} className="hover:underline" target="_blank">
-                {item.owner.login}
-              </Link>
-              /
-              <Link href={item.html_url} className="hover:underline" target="_blank">
-                {item.name}
-              </Link>
-            </div>
-            <div className="text-xs break-all">
-              {item.description}
-            </div>
-            <div className="flex flex-wrap items-center mt-2 gap-2">
-              {
-                item?.tags?.map((tag, i) => (
-                  <div className="cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-40 group flex justify-start items-center" key={i}>
-                    {tag.name}
-                    <Trash2 className="transition-[width] ease-in-out duration-300 w-0 h-3.5 group-hover:w-3.5 ml-1 cursor-pointer"
-                      onClick={() => onRemoveTag(tag, item)} />
-                  </div>
-                ))
-              }
-              <TagPopover tagList={tagList as FlatTagType[]} onAdd={(tag) => onAddTag(tag, item)}>
-                <Button variant="outline" className="w-5 h-5 p-1 bg-gray-300">
-                  <Hash className="bg-gray-200" />
-                </Button>
-              </TagPopover>
-            </div>
-          </Card>
-        })
+        starList
+          .filter((item) => !searchTag.length ||
+            searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
+          .filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
+            return <Card
+              className={cn(
+                "rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
+                selectedStar?.name === item.name && selectedStar.owner.login === item.owner.login ? "border-2 border-blue-300 hover:border-blue-300" : ""
+              )}
+              onClick={() => onClick(item)}
+              key={index}
+            >
+              <div className="flex gap-1 flex-start text-sm break-all">
+                <Link href={item.owner.html_url} className="hover:underline" target="_blank">
+                  {item.owner.login}
+                </Link>
+                /
+                <Link href={item.html_url} className="hover:underline" target="_blank">
+                  {item.name}
+                </Link>
+              </div>
+              <div className="text-xs break-all">
+                {item.description}
+              </div>
+              <div className="flex flex-wrap items-center mt-2 gap-2">
+                {
+                  item?.tags?.map((tag, i) => (
+                    <div className="cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
+                      {tag.name}
+                      <Trash2 className="transition-[width] ease-in-out duration-300 w-0 h-3.5 group-hover:w-3.5 ml-1 cursor-pointer"
+                        onClick={() => onRemoveTag(tag, item)} />
+                    </div>
+                  ))
+                }
+                <TagPopover tagList={tagList as FlatTagType[]} onAdd={(tag) => onAddTag(tag, item)}>
+                  <Button variant="outline" className="w-5 h-5 p-1 bg-gray-300">
+                    <Hash className="bg-gray-200" />
+                  </Button>
+                </TagPopover>
+              </div>
+            </Card>
+          })
       }
       {pending && <div>loading....</div>}
     </div>
