@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { text, pgSchema, bigserial, bigint } from "drizzle-orm/pg-core";
+import { text, pgSchema, bigserial, bigint, AnyPgColumn } from "drizzle-orm/pg-core";
 
 export const mySchema = pgSchema('product');
 
@@ -21,7 +21,7 @@ export type CreateTagType = typeof tags.$inferInsert;
 
 export const tagUserRelationTable = mySchema.table('tag_user_relations', {
   id: text().primaryKey(),
-  parent_id: text(),
+  parent_id: text().references((): AnyPgColumn => tagUserRelationTable.id, { onDelete: 'cascade' }),
   tag_id: bigint({ mode: "number" }).references(() => tags.id, { onDelete: 'cascade' }).notNull(),
   user_id: bigint({ mode: "number" }).references(() => users.id, { onDelete: 'cascade' }).notNull(),
   parent_tag_id: bigint({ mode: "number" }),
@@ -35,11 +35,5 @@ export const tagparentRelation = relations(tagUserRelationTable, ({ one }) => ({
   })
 }));
 
-export const tagUserParentRelation = relations(tagUserRelationTable, ({ one }) => ({
-  parent: one(tagUserRelationTable, {
-    fields: [tagUserRelationTable.parent_id],
-    references: [tagUserRelationTable.id],
-  })
-}));
 
 export type TagUserRelationType = typeof tagUserRelationTable.$inferInsert;

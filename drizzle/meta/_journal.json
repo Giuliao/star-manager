@@ -15,6 +15,13 @@
       "when": 1736050815095,
       "tag": "0001_amused_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1736060546331,
+      "tag": "0002_demonic_the_watchers",
+      "breakpoints": true
     }
   ]
 }
