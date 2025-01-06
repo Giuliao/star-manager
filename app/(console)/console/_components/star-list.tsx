@@ -79,7 +79,6 @@ export function StarList({ className, initNavItems }: Props) {
               newItem = {
                 ...newItem,
                 tags: [
-
                   ...item.tags.filter(t => t.item.id !== tag.id)
                 ]
               };
@@ -91,6 +90,36 @@ export function StarList({ className, initNavItems }: Props) {
       setStarCtx(prevCtx => ({ ...prevCtx, deletedTag: undefined }));
     }
   }, [starCtx.deletedTag]);
+
+  useEffect(() => {
+    if (starCtx.editedTag) {
+      setStarList(prev => {
+        return prev.map(item => {
+          const idx = item.tags?.findIndex((tag) => tag.item.id === starCtx.editedTag?.id);
+          if (idx !== undefined && idx !== null && idx >= 0) {
+            const originTagItem = item.tags![idx];
+            const lastIdx = originTagItem.name.lastIndexOf(item.tags![idx].item.title);
+
+            return {
+              ...item,
+              tags: [
+                ...(item.tags?.slice(0, idx) || []),
+                {
+                  ...originTagItem,
+                  name: `${originTagItem.name.slice(0, lastIdx)}${starCtx.editedTag?.title}`,
+                  item: {
+                    ...starCtx.editedTag
+                  }
+                },
+                ...(item.tags?.slice(idx + 1) || [])
+              ]
+            }
+          }
+          return item;
+        }) as StarItem[];
+      });
+    }
+  }, [starCtx.editedTag])
 
   const onClick = (item: StarItem) => {
     if (starCtx.selectedStar?.name === item.name && starCtx.selectedStar.owner.login === item.owner.login) {
@@ -140,7 +169,6 @@ export function StarList({ className, initNavItems }: Props) {
       selectedStar: { ...prevCtx.selectedStar, tags: [...(prevCtx.selectedStar?.tags?.filter(t => t.name !== item.name) || [])] } as StarItem,
       selectedTag: item,
       isDeleteTag: true
-
     }));
 
   }

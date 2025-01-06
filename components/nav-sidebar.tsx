@@ -3,6 +3,7 @@ import {
   Plus,
   ChevronRight,
   Trash2,
+  PencilLine,
 } from "lucide-react"
 import {
   Collapsible,
@@ -27,9 +28,10 @@ interface Props {
   onAddChange?: (changedItem: NavTagItem, newItem: NavTagItem, indices: number[]) => void;
   onDeleteChange?: (item: NavTagItem, indices: number[]) => void;
   onNavItemClick?: (item: NavTagItem, indices: number[]) => void;
+  onEditChange?: (changeItem: NavTagItem, indices: number[]) => void;
 }
 
-export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavItemClick }: Props) {
+export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavItemClick, onEditChange }: Props) {
   const onAddClick = (name: string, item: NavTagItem, indices: number[]) => {
     const newItem = {
       title: name,
@@ -54,6 +56,13 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
   const handleNavItemClick = (item: NavTagItem, indices: number[]) => {
     onNavItemClick?.(item, indices);
   }
+
+  const handleEditTitle = (name: string, item: NavTagItem, indices: number[]) => {
+    onEditChange?.({
+      ...item,
+      title: name
+    }, indices);
+  }
   return (
     <SidebarMenu>
       <Collapsible
@@ -73,6 +82,12 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
               <div className="flex justify-end items-center [&>svg]:size-4 [&>svg]:shrink-0 gap-1">
                 <NavPopover onAdd={(name) => onAddClick(name, item, indices)}>
                   <Plus
+                    className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
+                    onClick={(evt) => { evt.stopPropagation(); }}
+                  />
+                </NavPopover>
+                <NavPopover isEdit initValue={item.title} onAdd={(name) => handleEditTitle(name, item, indices)}>
+                  <PencilLine
                     className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
                     onClick={(evt) => { evt.stopPropagation(); }}
                   />
@@ -105,6 +120,12 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
                             <Plus
                               className="invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
                               onClick={(event) => { event.stopPropagation(); }}
+                            />
+                          </NavPopover>
+                          <NavPopover isEdit initValue={subItem.title} onAdd={(name) => handleEditTitle(name, subItem, [...indices, idx])}>
+                            <PencilLine
+                              className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
+                              onClick={(evt) => { evt.stopPropagation(); }}
                             />
                           </NavPopover>
                           <Trash2

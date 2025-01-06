@@ -10,6 +10,7 @@ interface StarContextType {
   isDeleteTag?: boolean;
   deletedTag?: NavTagItem[];
   selectedSidebarTag?: NavTagItem;
+  editedTag?: NavTagItem;
 }
 
 

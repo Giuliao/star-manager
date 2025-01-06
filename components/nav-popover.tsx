@@ -13,12 +13,14 @@ import {
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAdd?: (name: string) => void;
+  initValue?: string;
+  isEdit?: boolean;
 }
 
-export function NavPopover({ children, onAdd }: Props) {
+export function NavPopover({ children, onAdd, initValue, isEdit }: Props) {
 
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initValue || "");
 
   const onAddClick = () => {
     setOpen(false);
@@ -38,9 +40,9 @@ export function NavPopover({ children, onAdd }: Props) {
       >
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">New Tag</h4>
+            <h4 className="font-medium leading-none">{isEdit ? 'Edit Tag' : 'Add Tag'}</h4>
             <p className="text-sm text-muted-foreground">
-              add a new tag
+              {isEdit ? 'modify a tag' : 'add a new tag'}
             </p>
           </div>
           <div className="grid gap-2">
@@ -48,13 +50,14 @@ export function NavPopover({ children, onAdd }: Props) {
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
+                defaultValue={initValue}
                 placeholder="please input a tag name"
                 className="col-span-2 h-8"
                 onChange={e => setName(e.target.value)}
               />
             </div>
             <div className="flex justify-end gap-4 mt-4">
-              <Button onClick={onAddClick}>Add</Button>
+              <Button onClick={onAddClick}>{isEdit ? 'Save' : 'Add'}</Button>
               <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             </div>
           </div>

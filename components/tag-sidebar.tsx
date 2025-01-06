@@ -202,6 +202,43 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
     setStarCtx((prev) => ({ ...prev, selectedSidebarTag: { ...item, title: `${prefix}${item.title}` } }));
   }
 
+  const onEditChange = async (newItem: NavTagItem, indices: number[], idx: number) => {
+    let tag = await queryTagByName(newItem.title);
+    if (!tag) {
+      tag = (await createTag({
+        name: newItem.title
+      }))?.[0];
+    }
+
+    updateUserTagById(sessionUser.dbId, newItem.id as string, {
+      user_id: sessionUser.dbId,
+      tag_id: tag.id,
+      parent_id: newItem.parentId,
+      parent_tag_id: newItem.parentTagId,
+      content: [...(newItem.content || [])],
+    });
+
+    setNavItems(prev => {
+      if (indices.length === 0) {
+        prev[idx] = newItem;
+      } else {
+        indices.reduce((acc, cur, idx) => {
+          if (idx === indices.length - 1) {
+            acc![cur] = newItem;
+            return acc
+          }
+          return acc![cur]?.items;
+        }, prev[idx].items);
+      };
+      return [...prev];
+    });
+
+    setStarCtx(prev => ({
+      ...prev,
+      editedTag: newItem
+    }));
+  }
+
   return (
     <Sidebar className="absolute w-full group/root-container">
       <SidebarContent>
@@ -220,6 +257,7 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
                 }}
                 onDeleteChange={(item, indices) => { onDeleteChange(item, indices, idx) }}
                 onNavItemClick={(item, indices) => onNavItemClick(item, [idx, ...indices])}
+                onEditChange={(item, indices) => onEditChange(item, indices, idx)}
               />
             ))
           }
