@@ -1,12 +1,13 @@
 "use client";
 import { ChangeEvent, useEffect, useState } from "react";
-import { X } from "lucide-react"
+import { X, Menu } from "lucide-react"
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStarCtx } from "@/lib/context/star";
 import { parseNavItem } from "@/lib/hooks/use-taglist";
-import { FlatTagType } from "@/types/tag";
-import { Session } from "inspector";
+import type { FlatTagType } from "@/types/tag";
+import { useSidebar } from "@/components/ui/sidebar";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   onInputChange?: (evt: ChangeEvent<HTMLInputElement>) => void;
@@ -17,6 +18,7 @@ export function SearchControl({ onInputChange, onTagChange }: Props) {
 
   const [starCtx, setStarCtx] = useStarCtx()
   const [tags, setTags] = useState<FlatTagType[]>([])
+  const { setOpenMobile } = useSidebar()
 
   useEffect(() => {
     if (starCtx.selectedSidebarTag) {
@@ -34,7 +36,12 @@ export function SearchControl({ onInputChange, onTagChange }: Props) {
 
   return (
     <div className="w-full items-center sticky top-0 bg-white shadow-md p-2">
-      <Input className="w-full" onChange={onInputChange} />
+      <div className="w-full flex justify-start gap-1">
+        <Button variant="outline" size="icon" className="inline-flex sm:hidden" onClick={() => setOpenMobile(true)}>
+          <Menu className="text-primary" />
+        </Button>
+        <Input className="w-full" onChange={onInputChange} />
+      </div>
       <div className={cn("justify-start item-center flex-wrap gap-1 mt-2", tags.length > 0 ? 'flex' : 'hidden')}>
         {
           tags.map((tag: FlatTagType, i) => {

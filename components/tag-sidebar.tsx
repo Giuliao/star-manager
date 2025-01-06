@@ -12,6 +12,7 @@ import {
 import { NavSidebar } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
 import { useStarCtx } from "@/lib/context/star";
+import { cn } from "@/lib/utils";
 import {
   createUserTag,
   createTag,
@@ -28,7 +29,7 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   initNavItems?: NavTagItem[];
 }
 
-export function TagSidebar({ sessionUser, initNavItems }: Props) {
+export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   const [navItems, setNavItems] = useState<NavTagItem[]>(initNavItems || []);
   const [starCtx, setStarCtx] = useStarCtx()
 
@@ -240,7 +241,7 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
   }
 
   return (
-    <Sidebar className="absolute w-full group/root-container">
+    <Sidebar className={cn("absolute w-full group/root-container", className)}>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">

@@ -9,7 +9,6 @@ import { DynamicPanel } from "@/components/dynamic-panel";
 import { TagSidebar } from "@/components/tag-sidebar";
 import { StarList } from "./_components/star-list";
 import { StarContent } from "./_components/star-content";
-// import { StarTagServer } from "./_components/star-tag-server";
 import { auth } from "@/auth";
 import { listUserTagById } from "@/lib/actions/tag";
 import { SessionUser } from "@/types/user";
@@ -29,17 +28,21 @@ export default async function Console() {
       <ResizablePanelGroup
         direction="horizontal"
         className="flex-1">
-        <ResizablePanel defaultSize={30} className="relative">
+        <ResizablePanel defaultSize={20} className="relative hidden sm:block" order={1}>
           <TagSidebar sessionUser={session?.user as SessionUser} initNavItems={parsedTagData} />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={70}>
+        <ResizablePanel defaultSize={80} order={2}>
           <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={40}>
-              <StarList initNavItems={parsedTagData} />
+            <ResizablePanel defaultSize={40} order={3} >
+              <StarList initNavItems={parsedTagData} StarContentComp={
+                <Suspense key={`${owner}-${repo}`} fallback={<div className="p-4">Loading...</div>}>
+                  <StarContent />
+                </Suspense>}
+              />
             </ResizablePanel>
             <ResizableHandle />
-            <ResizablePanel defaultSize={60}>
+            <ResizablePanel defaultSize={60} order={4} className="hidden sm:block">
               <Suspense key={`${owner}-${repo}`} fallback={<div className="p-4">Loading...</div>}>
                 <StarContent />
               </Suspense>

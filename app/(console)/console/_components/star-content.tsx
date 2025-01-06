@@ -1,3 +1,4 @@
+"use server";
 import { Buffer } from "node:buffer";
 import Link from "next/link";
 import Image from "next/image";
@@ -141,3 +142,6 @@ export async function StarContent() {
     </div>
   );
 }
+
+
+export type StartContentType = typeof StarContent;

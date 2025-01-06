@@ -35,7 +35,7 @@ export function NavPopover({ children, onAdd, initValue, isEdit }: Props) {
       <PopoverContent
         className="w-80"
         align="start"
-        alignOffset={-20}
+        alignOffset={-40}
         onClick={(evt) => { evt.stopPropagation(); }}
       >
         <div className="grid gap-4">
