@@ -203,7 +203,7 @@ export function TagSidebar({ sessionUser, initNavItems }: Props) {
   }
 
   return (
-    <Sidebar className="absolute w-full">
+    <Sidebar className="absolute w-full group/root-container">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">
