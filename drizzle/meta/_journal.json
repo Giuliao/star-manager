@@ -22,6 +22,13 @@
       "when": 1736060546331,
       "tag": "0002_demonic_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1736132493764,
+      "tag": "0003_curly_mach_iv",
+      "breakpoints": true
     }
   ]
 }

@@ -26,6 +26,7 @@ export const tagUserRelationTable = mySchema.table('tag_user_relations', {
   user_id: bigint({ mode: "number" }).references(() => users.id, { onDelete: 'cascade' }).notNull(),
   parent_tag_id: bigint({ mode: "number" }),
   content: text('content').array().default([]),
+  created_at: text('created_at').default(new Date().toISOString()).notNull(),
 })
 
 export const tagparentRelation = relations(tagUserRelationTable, ({ one }) => ({

@@ -1,6 +1,6 @@
 "use server";
 import { v4 as uuidv4 } from 'uuid';
-import { eq, and } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
 import { db } from '@/db';
 import {
   type CreateTagType,
@@ -29,7 +29,7 @@ export type CreateUserTagType = Awaited<ReturnType<typeof createUserTag>>;
 export async function listUserTagById(id: number) {
   return await db.select().from(tagUserRelationTable)
     .where(eq(tagUserRelationTable.user_id, id))
-    .leftJoin(tags, eq(tags.id, tagUserRelationTable.tag_id));
+    .leftJoin(tags, eq(tags.id, tagUserRelationTable.tag_id)).orderBy(asc(tagUserRelationTable.created_at));
 }
 
 export type UserTagListType = Awaited<ReturnType<typeof listUserTagById>>;

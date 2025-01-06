@@ -1,0 +1,1 @@
+ALTER TABLE "product"."tag_user_relations" ADD COLUMN "created_at" text DEFAULT '2025-01-06T03:01:33.758Z' NOT NULL;
