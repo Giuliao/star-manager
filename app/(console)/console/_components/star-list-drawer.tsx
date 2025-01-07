@@ -21,7 +21,7 @@ export function StarListDrawer({ children, StarContentComp }: Props) {
         {children}
       </DrawerTrigger>
       <DrawerContent className="h-[90vh]">
-        <div className="mx-auto w-full max-w-sm">
+        <div className="mx-auto w-full">
           {StarContentComp}
           <DrawerHeader className="hidden">
             <DrawerTitle></DrawerTitle>

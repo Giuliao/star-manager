@@ -207,7 +207,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
                       {item.name}
                     </Link>
                   </div>
-                  <div className="text-xs break-all">
+                  <div className="text-xs break-all cursor-text">
                     {item.description}
                   </div>
                   <div className="flex flex-wrap items-center mt-2 gap-2">

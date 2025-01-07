@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,10 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAdd?: (name: string) => void;
   initValue?: string;
   isEdit?: boolean;
+  alignOffest?: number
 }
 
-export function NavPopover({ children, onAdd, initValue, isEdit }: Props) {
+export function NavPopover({ children, onAdd, initValue, isEdit, alignOffest }: Props) {
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(initValue || "");
@@ -28,15 +29,14 @@ export function NavPopover({ children, onAdd, initValue, isEdit }: Props) {
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} >
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild >
         {children}
       </PopoverTrigger>
       <PopoverContent
         className="w-80"
         align="start"
-        alignOffset={-40}
-        onClick={(evt) => { evt.stopPropagation(); }}
+        alignOffset={alignOffest ?? -250}
       >
         <div className="grid gap-4">
           <div className="space-y-2">

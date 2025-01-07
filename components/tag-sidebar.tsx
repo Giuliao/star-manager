@@ -241,13 +241,13 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   }
 
   return (
-    <Sidebar className={cn("absolute w-full group/root-container", className)}>
-      <SidebarContent>
+    <Sidebar className={cn("absolute w-full", className)}>
+      <SidebarContent className="group/root-container">
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">
             Tags
-            <NavPopover onAdd={onAddRootTag} >
-              <Plus className="ml-2 invisible group-hover/label:visible hover:cursor-pointer active:animate-ping" />
+            <NavPopover onAdd={onAddRootTag} alignOffest={0} >
+              <Plus className="ml-2 hover:cursor-pointer active:animate-ping" />
             </NavPopover>
           </SidebarGroupLabel>
           {
