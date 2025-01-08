@@ -1,3 +1,5 @@
+import { marked } from "marked";
+import DOMPurify from 'isomorphic-dompurify';
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { NavTagItem } from "@/types/tag"
@@ -59,4 +61,13 @@ export function parseTagData(data: UserTagListType) {
   return parsedData;
 }
 
+
+export function markdownToHtml(markdown: string): string {
+  // Convert markdown to HTML
+  const rawHtml = marked(markdown, { async: false });
+  // Sanitize the HTML to prevent XSS attacks
+  const sanitizedHtml = DOMPurify.sanitize(rawHtml);
+
+  return sanitizedHtml;
+}
 
