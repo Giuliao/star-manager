@@ -28,7 +28,7 @@ export default async function Page() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex justify-center">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
@@ -42,7 +42,10 @@ export default async function Page() {
               </div>
               <div className="space-x-4 flex justify-center items-center">
                 {
-                  user ? <></>
+                  user ?
+                    <Link href="/console">
+                      <Button>Goto</Button>
+                    </Link>
                     : <SignIn>
                       <Button>
                         <Github className="mr-2 h-4 w-4" />
@@ -54,7 +57,7 @@ export default async function Page() {
             </div>
           </div>
         </section>
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800 flex justify-center">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
               Key Features
@@ -84,7 +87,7 @@ export default async function Page() {
             </div>
           </div>
         </section>
-        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 flex justify-center">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
               How It Works
@@ -118,7 +121,7 @@ export default async function Page() {
             </div>
           </div>
         </section>
-        <section id="cta" className="w-full py-12 md:py-24 lg:py-32 bg-primary text-white">
+        <section id="cta" className="w-full py-12 md:py-24 lg:py-32 bg-primary text-white flex justify-center">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
