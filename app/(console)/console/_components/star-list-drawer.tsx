@@ -10,7 +10,7 @@ import {
 
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
-  StarContentComp: ReactElement
+  StarContentComp?: ReactElement
 };
 
 

@@ -20,7 +20,7 @@ import { useSidebar } from "@/components/ui/sidebar"
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
-  StarContentComp: ReactElement;
+  StarContentComp?: ReactElement;
 }
 
 export function StarList({ className, initNavItems, StarContentComp }: Props) {
@@ -236,8 +236,11 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   );
 }
 
-function CardWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp: ReactElement }) {
+function CardWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement }) {
   const { isMobile } = useSidebar()
+  useEffect(() => {
+    document.cookie = `isMobile=${isMobile};path=/`;
+  }, [isMobile])
   return isMobile ?
     <StarListDrawer
       StarContentComp={StarContentComp}

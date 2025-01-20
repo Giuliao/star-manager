@@ -96,7 +96,7 @@ export async function StarContent() {
         fill
         style={{
         }}
-        className={cn("min-w-4 min-h-4 !relative object-contain", props.className)}
+        className={cn("min-w-4 min-h-4 !relative object-contain !w-auto inline-block", props.className)}
         alt={props.alt.trim() || "?"}
       />);
     },

@@ -1,10 +1,16 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { sleep } from "@/lib/utils";
 
 export type QueryFunc<T = any> = (param: any) => Promise<T>;
 export type ParseFunc<T = any, E = any> = (arg: T) => E;
 
-export function useQueryAllData<T = any>(queryFunc: QueryFunc, parseFunc: ParseFunc, params = { per_page: 20, page: 1 }) {
+export function useQueryAllData<T = any>(
+  queryFunc: QueryFunc,
+  parseFunc: ParseFunc,
+  params = { per_page: 20, page: 1 },
+  waitTime = 500
+) {
 
   const [data, setData] = useState<T[]>([]);
 
@@ -32,8 +38,9 @@ export function useQueryAllData<T = any>(queryFunc: QueryFunc, parseFunc: ParseF
             per_page: perPage,
             page: page
           };
-
         }
+
+        await sleep(waitTime);
       }
     })();
 

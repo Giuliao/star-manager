@@ -71,3 +71,8 @@ export function markdownToHtml(markdown: string): string {
   return sanitizedHtml;
 }
 
+
+
+export function sleep(milliseconds: number) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}

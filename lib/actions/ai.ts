@@ -9,6 +9,13 @@ const openai = createOpenAI({
 });
 
 export async function queryOpenAI(messages: CoreMessage[]) {
+  messages.unshift(
+    {
+      role: "user",
+      content: "你是一个专业的信息总结师，请你用准确专业的言语概括内容。用户将发送readme源文件内容给你，请配合输出对应的中文总结概括"
+    } as CoreMessage,
+  );
+
   const result = streamText({
     model: openai('gpt-4o'),
     messages,
