@@ -1,11 +1,16 @@
 "use server";
 import { createOpenAI } from '@ai-sdk/openai';
 import { CoreMessage, streamText } from 'ai';
+import {
+  OPENAI_MODEL,
+  OPENAI_API_KEY,
+  OPENAI_BASE_URL
+} from '@/lib/constants';
 
 
 const openai = createOpenAI({
-  baseURL: process.env.OPENAI_BASE_URL,
-  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: OPENAI_BASE_URL,
+  apiKey: OPENAI_API_KEY,
 });
 
 export async function queryOpenAI(messages: CoreMessage[]) {
@@ -17,7 +22,7 @@ export async function queryOpenAI(messages: CoreMessage[]) {
   );
 
   const result = streamText({
-    model: openai('gpt-4o'),
+    model: openai(OPENAI_MODEL),
     messages,
   });
 

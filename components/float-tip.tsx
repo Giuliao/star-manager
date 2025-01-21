@@ -16,7 +16,6 @@ export function FloatTip({ markdownStr, className }: Props) {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    console.log("request openai====>");
     startTransition(async () => {
       const response = await queryOpenAI([{
         role: "user",
