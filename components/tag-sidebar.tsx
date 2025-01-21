@@ -1,6 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import {
+  LoaderCircle,
   Plus
 } from "lucide-react"
 import {
@@ -31,7 +32,8 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
 
 export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   const [navItems, setNavItems] = useState<NavTagItem[]>(initNavItems || []);
-  const [starCtx, setStarCtx] = useStarCtx()
+  const [starCtx, setStarCtx] = useStarCtx();
+  const [pending, startTransition] = useTransition();
 
   useEffect(() => {
     setStarCtx(prev => ({ ...prev, tagList: navItems }));
@@ -122,36 +124,37 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   }
 
   const onAddTag = async (item: NavTagItem, newItem: NavTagItem, indices: number[], idx: number) => {
-    let tag = await queryTagByName(newItem.title);
-    if (!tag) {
-      tag = (await createTag({
-        name: newItem.title
+    startTransition(async () => {
+      let tag = await queryTagByName(newItem.title);
+      if (!tag) {
+        tag = (await createTag({
+          name: newItem.title
+        }))?.[0];
+      }
+      const result = (await createUserTag({
+        user_id: sessionUser.dbId,
+        tag_id: tag.id,
+        parent_id: newItem.parentId,
+        parent_tag_id: newItem.parentTagId,
+        content: [],
       }))?.[0];
-    }
-    const result = (await createUserTag({
-      user_id: sessionUser.dbId,
-      tag_id: tag.id,
-      parent_id: newItem.parentId,
-      parent_tag_id: newItem.parentTagId,
-      content: [],
-    }))?.[0];
-    newItem.id = result.id;
+      newItem.id = result.id;
 
-    setNavItems(prev => {
-      if (indices.length === 0) {
-        prev[idx] = item;
-      } else {
-        indices.reduce((acc, cur, idx) => {
-          if (idx === indices.length - 1) {
-            acc![cur] = item;
-            return acc
-          }
-          return acc![cur]?.items;
-        }, prev[idx].items);
-      };
-      return [...prev];
+      setNavItems(prev => {
+        if (indices.length === 0) {
+          prev[idx] = item;
+        } else {
+          indices.reduce((acc, cur, idx) => {
+            if (idx === indices.length - 1) {
+              acc![cur] = item;
+              return acc
+            }
+            return acc![cur]?.items;
+          }, prev[idx].items);
+        };
+        return [...prev];
+      });
     });
-
   }
   const onDeleteChange = (item: NavTagItem, indices: number[], idx: number) => {
     setNavItems(prev => {
@@ -262,6 +265,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
               />
             ))
           }
+          {pending && <div className="flex items-center justify-start p-2"><LoaderCircle className="animate-spin w-4 h-4" /></div>}
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
