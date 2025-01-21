@@ -13,7 +13,9 @@ const openai = createOpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-export async function queryOpenAI(messages: CoreMessage[]) {
+
+// TODO: how to stop a server action
+export async function queryOpenAI(messages: CoreMessage[], signal?: AbortSignal) {
   messages.unshift(
     {
       role: "user",
@@ -24,6 +26,7 @@ export async function queryOpenAI(messages: CoreMessage[]) {
   const result = streamText({
     model: openai(OPENAI_MODEL),
     messages,
+    abortSignal: signal
   });
 
   return result.toDataStream();

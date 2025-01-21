@@ -76,3 +76,18 @@ export function markdownToHtml(markdown: string): string {
 export function sleep(milliseconds: number) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
+
+
+export function abortableStream(signal: AbortSignal) {
+  return new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      if (signal.aborted) {
+        controller.error(new Error("Stream aborted by AbortSignal"));
+        return;
+      }
+      controller.enqueue(chunk); // Pass the chunk downstream
+    },
+  });
+}
+
+

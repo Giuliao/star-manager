@@ -1,14 +1,15 @@
 "use client"
-import { markdownToHtml, cn } from '@/lib/utils';
-import { queryOpenAI } from '@/lib/actions/ai';
-import { processDataStream } from 'ai';
-import { useEffect, useState, useTransition } from 'react';
-import { Bot } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { queryOpenAI } from '@/lib/actions/ai';
+import { cn, markdownToHtml, abortableStream } from '@/lib/utils';
+import { processDataStream } from 'ai';
+import { Bot } from 'lucide-react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   markdownStr: string;
 };
+
 
 export function FloatTip({ markdownStr, className }: Props) {
 
@@ -16,6 +17,7 @@ export function FloatTip({ markdownStr, className }: Props) {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    const controller = new AbortController();
     startTransition(async () => {
       const response = await queryOpenAI([{
         role: "user",
@@ -24,7 +26,7 @@ export function FloatTip({ markdownStr, className }: Props) {
       );
 
       await processDataStream({
-        stream: response,
+        stream: response.pipeThrough(abortableStream(controller.signal)),
         onTextPart(value) {
           setMessage(prev => `${prev}${value}`);
         },
@@ -36,6 +38,9 @@ export function FloatTip({ markdownStr, className }: Props) {
       });
     });
 
+    return () => {
+      controller.abort()
+    }
   }, [])
 
   return (
