@@ -15,8 +15,8 @@ import { useStarCtx } from "@/lib/context/star";
 import { useTagList, parseNavItem } from "@/lib/hooks/use-taglist";
 import { SearchControl } from "./search-control";
 import { StarListDrawer } from "./star-list-drawer";
-import type { StartContentType } from './star-content'
 import { useSidebar } from "@/components/ui/sidebar"
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
@@ -124,6 +124,10 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     }
   }, [starCtx.editedTag])
 
+  const onSearchInputChange = useDebounce((evt: any) => {
+    setSearchStr(evt?.target?.value as string);
+  }, 500)
+
   const onClick = (item: StarItem) => {
     if (starCtx.selectedStar?.name === item.name && starCtx.selectedStar.owner.login === item.owner.login) {
       return;
@@ -181,7 +185,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen relative overflow-y-auto", className)}>
       <SearchControl
         onTagChange={setSearchTag}
-        onInputChange={(evt) => setSearchStr(evt?.target?.value as string)} />
+        onInputChange={onSearchInputChange} />
       {
         starList
           .filter((item) => !searchTag.length ||
