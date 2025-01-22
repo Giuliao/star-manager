@@ -1,14 +1,15 @@
 "use client"
 import { Skeleton } from '@/components/ui/skeleton';
 import { queryOpenAI } from '@/lib/actions/ai';
-import { cn, markdownToHtml, abortableStream } from '@/lib/utils';
+import { cn, markdownToHtml, abortableStream, withAbort } from '@/lib/utils';
 import { processDataStream } from 'ai';
 import { Bot } from 'lucide-react';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   markdownStr: string;
 };
+
 
 
 export function FloatTip({ markdownStr, className }: Props) {
@@ -19,27 +20,34 @@ export function FloatTip({ markdownStr, className }: Props) {
   useEffect(() => {
     const controller = new AbortController();
     startTransition(async () => {
-      const response = await queryOpenAI([{
+      const wrappedRequest = withAbort(queryOpenAI, controller.signal);
+      const response = await wrappedRequest([{
         role: "user",
         content: markdownStr
       }]
       );
 
-      await processDataStream({
-        stream: response.pipeThrough(abortableStream(controller.signal)),
-        onTextPart(value) {
-          setMessage(prev => `${prev}${value}`);
-        },
-        onDataPart(value) {
-        },
-        onErrorPart(value) {
-          console.log(value);
-        },
-      });
+      (async () => {
+        try {
+          await processDataStream({
+            stream: response.pipeThrough(abortableStream(controller.signal)),
+            onTextPart(value) {
+              setMessage(prev => `${prev}${value}`);
+            },
+            onDataPart(value) {
+            },
+            onErrorPart(value) {
+              console.log(value);
+            },
+          });
+        } catch (e) {
+          console.log(e)
+        }
+      })()
     });
 
     return () => {
-      controller.abort()
+      controller.abort();
     }
   }, [])
 

@@ -182,17 +182,17 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
 
 
   return (
-    <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen relative overflow-y-auto", className)}>
-      <SearchControl
-        onTagChange={setSearchTag}
-        onInputChange={onSearchInputChange} />
-      {
-        starList
-          .filter((item) => !searchTag.length ||
-            searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
-          .filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
-            return (
-              <CardWrapper key={index} StarContentComp={StarContentComp} >
+    <StarListWrapper StarContentComp={StarContentComp}>
+      <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen relative overflow-y-auto", className)}>
+        <SearchControl
+          onTagChange={setSearchTag}
+          onInputChange={onSearchInputChange} />
+        {
+          starList
+            .filter((item) => !searchTag.length ||
+              searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
+            .filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
+              return (
                 <Card
                   className={cn(
                     "rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
@@ -231,16 +231,16 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
                     </TagPopover>
                   </div>
                 </Card>
-              </CardWrapper>
-            )
-          })
-      }
-      {pending && <div>loading....</div>}
-    </div>
+              )
+            })
+        }
+        {pending && <div>loading....</div>}
+      </div>
+    </StarListWrapper>
   );
 }
 
-function CardWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement }) {
+function StarListWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement }) {
   const { isMobile } = useSidebar()
   useEffect(() => {
     document.cookie = `isMobile=${isMobile};path=/`;

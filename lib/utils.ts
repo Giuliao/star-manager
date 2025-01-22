@@ -90,4 +90,24 @@ export function abortableStream(signal: AbortSignal) {
   });
 }
 
+export function withAbort<F extends (...args: any[]) => Promise<any>>(func: F, signal: AbortSignal) {
+  return function (...args: any[]) {
+    const checkerAbort = async () => {
+      while (signal.aborted === false) {
+        await sleep(100);
+      }
 
+      return new ReadableStream({
+        start(controller) {
+          controller.enqueue("Stream aborted by AbortSignal");
+          controller.close();
+        }
+      })
+    }
+
+    return Promise.race([
+      func(...args),
+      checkerAbort()
+    ]);
+  }
+}

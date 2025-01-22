@@ -27,7 +27,7 @@ export default async function Console() {
   const WrapStarContent = () => {
     return (
       <Suspense key={`${owner}-${repo}`} fallback={<StartContentLoading />}>
-        <StarContent />
+        <StarContent key={`${owner}-${repo}`} />
       </Suspense>
     )
   }

@@ -103,27 +103,27 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   }, [starCtx.selectedTag])
 
 
-  const onAddRootTag = async (name: string) => {
-    let tag = await queryTagByName(name);
-    if (!tag) {
-      tag = (await createTag({
-        name: name
+  const onAddRootTag = (name: string) => {
+    startTransition(async () => {
+      let tag = await queryTagByName(name);
+      if (!tag) {
+        tag = (await createTag({
+          name: name
+        }))?.[0];
+      }
+      const result = (await createUserTag({
+        user_id: sessionUser.dbId,
+        tag_id: tag.id,
+        content: [],
       }))?.[0];
-    }
-    const result = (await createUserTag({
-      user_id: sessionUser.dbId,
-      tag_id: tag.id,
-      content: [],
-    }))?.[0];
 
-    setNavItems(prev => {
-      return [...prev, { title: name || "new tag", id: result.id }] as NavTagItem[];
+      setNavItems(prev => {
+        return [...prev, { title: name || "new tag", id: result.id }] as NavTagItem[];
+      });
     });
-
-
   }
 
-  const onAddTag = async (item: NavTagItem, newItem: NavTagItem, indices: number[], idx: number) => {
+  const onAddTag = (item: NavTagItem, newItem: NavTagItem, indices: number[], idx: number) => {
     startTransition(async () => {
       let tag = await queryTagByName(newItem.title);
       if (!tag) {

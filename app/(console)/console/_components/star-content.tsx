@@ -141,6 +141,7 @@ export async function StarContent() {
           }
         }} />
       <FloatTip
+        key={`${repo}-${owner}`}
         className={cn("fixed bottom-4 right-4 rounded-lg w-5 h-3 shadow-lg backdrop-blur-sm bg-white/60",
           "transition-all ease-in-out duration-500 hover:w-[90vw] hover:sm:w-[600px] hover:h-2/3",
           "overflow-visible border-[0.5px] border-gray-300"
