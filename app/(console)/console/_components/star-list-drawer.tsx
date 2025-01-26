@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -10,7 +10,7 @@ import {
 
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
-  StarContentComp?: ReactElement
+  StarContentComp?: ReactElement | ReactNode
 };
 
 

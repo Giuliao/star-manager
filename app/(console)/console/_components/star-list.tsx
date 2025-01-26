@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ReactElement, useEffect, useState, useTransition } from "react";
+import { ReactElement, ReactNode, useEffect, useState, useTransition } from "react";
 import { Hash, Trash2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -20,7 +20,7 @@ import { useDebounce } from "@/lib/hooks/use-debounce";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
-  StarContentComp?: ReactElement;
+  StarContentComp?: ReactElement | ReactNode;
 }
 
 export function StarList({ className, initNavItems, StarContentComp }: Props) {
@@ -135,7 +135,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     setSelectedStar(item);
     document.cookie = `owner=${item.owner.login};path=/`;
     document.cookie = `repo=${item.name};path=/`;
-    router.refresh();
+    router.replace("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));;
     setStarCtx(prevCtx => ({ ...prevCtx, selectedStar: item }));
   };
 
@@ -240,10 +240,12 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   );
 }
 
-function StarListWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement }) {
+function StarListWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement | ReactNode }) {
   const { isMobile } = useSidebar()
+  const router = useRouter();
   useEffect(() => {
     document.cookie = `isMobile=${isMobile};path=/`;
+    router.refresh();
   }, [isMobile])
   return isMobile ?
     <StarListDrawer
