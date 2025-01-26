@@ -10,7 +10,7 @@ import { TagPopover } from "@/components/tag-popover";
 import { getStarList } from "@/lib/actions/github";
 import type { StarItem } from "@/types/github";
 import type { FlatTagType, NavTagItem } from "@/types/tag";
-import { useQueryAllData } from "@/lib/hooks/query";
+import { useQueryGithubStarStream } from "@/lib/hooks/query";
 import { useStarCtx } from "@/lib/context/star";
 import { useTagList, parseNavItem } from "@/lib/hooks/use-taglist";
 import { SearchControl } from "./search-control";
@@ -64,13 +64,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     })()
   }, []);
 
-  const [newData] = useQueryAllData(
-    async (param: any) => await getStarList(param),
-    (resp: any) => resp.data,
-    { per_page: 20, page: 2 }
-  );
-
-
+  const [newData] = useQueryGithubStarStream({ per_page: 20, page: 2 });
   useEffect(() => {
     startTransition(() => {
       setStarList(data => [...data, ...(newData as StarItem[]).map(initTagData)] as StarItem[]);

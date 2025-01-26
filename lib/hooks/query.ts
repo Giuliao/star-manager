@@ -5,6 +5,61 @@ import { sleep } from "@/lib/utils";
 export type QueryFunc<T = any> = (param: any) => Promise<T>;
 export type ParseFunc<T = any, E = any> = (arg: T) => E;
 
+export function useQueryGithubStarStream<T = any>(
+  params = { per_page: 20, page: 1 },
+  abortSignal?: AbortSignal
+) {
+  const [data, setData] = useState<T[]>([]);
+
+  useEffect(() => {
+    const abortCtl = new AbortController();
+    (async () => {
+      try {
+        const response = await fetch(`/api/github?per_page=${params.per_page}&page=${params.page}`, {
+          method: "GET",
+          signal: abortSignal || abortCtl.signal
+        });
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        if (reader) {
+          let partialChunk = ""; // For handling split JSON strings across chunks
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            partialChunk += decoder.decode(value, { stream: true });
+            let boundary = partialChunk.lastIndexOf("\n");
+            if (boundary !== -1) {
+              // Process complete JSON strings
+              const completeChunks = partialChunk.slice(0, boundary).split("\n");
+              partialChunk = partialChunk.slice(boundary + 1); // Save the remainder for the next chunk
+
+              for (const chunk of completeChunks) {
+                if (chunk.trim()) {
+                  const parsed = JSON.parse(chunk);
+                  setData([...parsed])
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        if ((err as any).name === 'AbortError') {
+          console.log(err);
+        } else {
+          console.error(err)
+        }
+      }
+    })();
+
+    return () => {
+      abortCtl.abort();
+    }
+  }, [])
+
+  return [data, setData];
+}
+
 export function useQueryAllData<T = any>(
   queryFunc: QueryFunc,
   parseFunc: ParseFunc,
