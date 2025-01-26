@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactElement, ReactNode, useEffect, useState, useTransition } from "react";
-import { Hash, Trash2 } from 'lucide-react';
+import { Hash, Trash2, Ellipsis } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,13 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   const router = useRouter();
   const [tagList] = useTagList();
   const [parsedTagList] = useState(parseNavItem(initNavItems || []));
+  const { isMobile } = useSidebar()
+
+  useEffect(() => {
+    document.cookie = `isMobile=${isMobile};path=/`;
+    router.refresh();
+  }, [isMobile])
+
 
   const initTagData = (item: StarItem) => {
     parsedTagList.forEach(tag => {
@@ -182,27 +189,28 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
 
 
   return (
-    <StarListWrapper StarContentComp={StarContentComp}>
-      <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen relative overflow-y-auto", className)}>
-        <SearchControl
-          onTagChange={setSearchTag}
-          onInputChange={onSearchInputChange} />
-        {
-          starList
-            .filter((item) => !searchTag.length ||
-              searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
-            .filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
-              return (
-                <Card
-                  className={cn(
-                    "rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
-                    selectedStar?.name === item.name && selectedStar.owner.login === item.owner.login ? "border-2 border-blue-300 hover:border-blue-300" : ""
-                  )}
-                  onClick={() => onClick(item)}
-                  key={index}
-                >
+    <div className={cn("flex items-center justify-start flex-col p-2 gap-3 h-screen relative overflow-y-auto", className)}>
+      <SearchControl
+        onTagChange={setSearchTag}
+        onInputChange={onSearchInputChange} />
+      {
+        starList
+          .filter((item) => !searchTag.length ||
+            searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
+          .filter(item => !searchStr || item.name.includes(searchStr)).map((item: StarItem, index: number) => {
+            return (
+              <Card
+                className={cn(
+                  "rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
+                  selectedStar?.name === item.name && selectedStar.owner.login === item.owner.login ? "border-2 border-blue-300 hover:border-blue-300" : ""
+                )}
+                onClick={() => onClick(item)}
+                key={index}
+              >
 
-                  <div className="flex gap-1 flex-start text-sm break-all">
+
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-1 flex-start text-sm break-all items-center">
                     <Link href={item.owner.html_url} className="hover:underline" target="_blank">
                       {item.owner.login}
                     </Link>
@@ -211,49 +219,46 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
                       {item.name}
                     </Link>
                   </div>
-                  <div className="text-xs break-all cursor-text">
-                    {item.description}
-                  </div>
-                  <div className="flex flex-wrap items-center mt-2 gap-2">
-                    {
-                      item?.tags?.map((tag, i) => (
-                        <div className="cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
-                          {tag.name}
-                          <Trash2 className="transition-[width] ease-in-out duration-300 w-0 h-3.5 group-hover:w-3.5 ml-1 cursor-pointer"
-                            onClick={() => onRemoveTag(tag, item)} />
-                        </div>
-                      ))
-                    }
-                    <TagPopover tagList={tagList as FlatTagType[]} onAdd={(tag) => onAddTag(tag, item)}>
-                      <Button variant="outline" className="w-5 h-5 p-1 bg-gray-300">
-                        <Hash className="bg-gray-200" />
-                      </Button>
-                    </TagPopover>
-                  </div>
-                </Card>
-              )
-            })
-        }
-        {pending && <div>loading....</div>}
-      </div>
-    </StarListWrapper>
+
+                  {isMobile &&
+                    <StarContentDrawer StarContentComp={StarContentComp}>
+                      <Ellipsis className="float-right w-4 h-4" />
+                    </StarContentDrawer>}
+                </div>
+                <div className="text-xs break-all cursor-text">
+                  {item.description}
+                </div>
+                <div className="flex flex-wrap items-center mt-2 gap-2">
+                  {
+                    item?.tags?.map((tag, i) => (
+                      <div className="cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
+                        {tag.name}
+                        <Trash2 className="transition-[width] ease-in-out duration-300 w-0 h-3.5 group-hover:w-3.5 ml-1 cursor-pointer"
+                          onClick={() => onRemoveTag(tag, item)} />
+                      </div>
+                    ))
+                  }
+                  <TagPopover tagList={tagList as FlatTagType[]} onAdd={(tag) => onAddTag(tag, item)}>
+                    <Button variant="outline" className="w-5 h-5 p-1 bg-gray-300">
+                      <Hash className="bg-gray-200" />
+                    </Button>
+                  </TagPopover>
+                </div>
+              </Card>
+            )
+          })
+      }
+      {pending && <div>loading....</div>}
+    </div>
   );
 }
 
-function StarListWrapper({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement | ReactNode }) {
-  const { isMobile } = useSidebar()
-  const router = useRouter();
-  useEffect(() => {
-    document.cookie = `isMobile=${isMobile};path=/`;
-    router.refresh();
-  }, [isMobile])
-  return isMobile ?
-    <StarListDrawer
-      StarContentComp={StarContentComp}
-    >
-      {children}
-    </StarListDrawer>
-    : <>{children}</>
+function StarContentDrawer({ children, StarContentComp }: React.HTMLAttributes<HTMLDivElement> & { StarContentComp?: ReactElement | ReactNode }) {
+  return <StarListDrawer
+    StarContentComp={StarContentComp}
+  >
+    {children}
+  </StarListDrawer>
 
 }
 
