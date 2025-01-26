@@ -244,7 +244,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   }
 
   return (
-    <Sidebar className={cn("absolute w-full", className)}>
+    <Sidebar modal={false} className={cn("absolute w-full", className)}>
       <SidebarContent className="group/root-container">
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">
