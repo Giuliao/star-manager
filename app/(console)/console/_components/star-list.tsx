@@ -134,10 +134,10 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
       return;
     }
     setSelectedStar(item);
+    setStarCtx(prevCtx => ({ ...prevCtx, selectedStar: item }));
     document.cookie = `owner=${item.owner.login};path=/`;
     document.cookie = `repo=${item.name};path=/`;
-    router.replace("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));;
-    setStarCtx(prevCtx => ({ ...prevCtx, selectedStar: item }));
+    router.replace("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));
   };
 
 
@@ -201,8 +201,6 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
                 onClick={() => onClick(item)}
                 key={index}
               >
-
-
                 <div className="flex justify-between items-center">
                   <div className="flex gap-1 flex-start text-sm break-all items-center">
                     <Link href={item.owner.html_url} className="hover:underline" target="_blank">
