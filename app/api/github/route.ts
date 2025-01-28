@@ -28,14 +28,28 @@ async function* makeIterator(param: { per_page: number, page: number }) {
   }
 }
 
-function iteratorToStream(iterator: any) {
+function iteratorToStream(iterator: any, req?: NextRequest) {
+
+
   return new ReadableStream({
     async pull(controller) {
+
+      const handleAbort = () => {
+        controller.close();
+      }
       const { value, done } = await iterator.next()
       if (done) {
-        controller.close()
+        controller.close();
+        if (req?.signal) {
+          req.signal.removeEventListener('abort', handleAbort);
+        }
+
       } else {
         controller.enqueue(`${JSON.stringify(value)}\n`);
+      }
+
+      if (req?.signal) {
+        req.signal.addEventListener("abort", handleAbort);
       }
     },
   })

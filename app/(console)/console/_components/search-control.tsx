@@ -40,7 +40,7 @@ export function SearchControl({ onInputChange, onTagChange }: Props) {
         <Button variant="outline" size="icon" className="inline-flex sm:hidden" onClick={() => setOpenMobile(true)}>
           <Menu className="text-primary" />
         </Button>
-        <Input className="w-full" onChange={onInputChange} />
+        <Input placeholder="Please input repo name or description" className="w-full" onChange={onInputChange} />
       </div>
       <div className={cn("justify-start item-center flex-wrap gap-1 mt-2", tags.length > 0 ? 'flex' : 'hidden')}>
         {
