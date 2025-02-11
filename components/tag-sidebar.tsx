@@ -2,7 +2,9 @@
 import { useState, useEffect, useTransition } from "react";
 import {
   LoaderCircle,
-  Plus
+  Plus,
+  LayoutGrid,
+  Bookmark
 } from "lucide-react"
 import {
   Sidebar,
@@ -34,6 +36,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   const [navItems, setNavItems] = useState<NavTagItem[]>(initNavItems || []);
   const [starCtx, setStarCtx] = useStarCtx();
   const [pending, startTransition] = useTransition();
+  const [selectedIdxs, setSelectedIdxs] = useState<number[]>([]);
 
   useEffect(() => {
     setStarCtx(prev => ({ ...prev, tagList: navItems }));
@@ -175,6 +178,16 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       return updatedItems;
     });
 
+    let refreshedSelectedIdxs = [];
+    const newIdxs = [idx, ...indices];
+    for (let i = 0; i < newIdxs.length; i++) {
+      if (selectedIdxs.length > i && selectedIdxs[i] > idx && i === newIdxs.length - 1) {
+        refreshedSelectedIdxs.push(selectedIdxs[i] - 1);
+      } else {
+        refreshedSelectedIdxs.push(selectedIdxs[i]);
+      }
+    }
+    setSelectedIdxs(refreshedSelectedIdxs);
 
     const getDeleteTag = (item: NavTagItem) => {
       let result: NavTagItem[] = [item];
@@ -204,6 +217,28 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
     }, navItems);
 
     setStarCtx((prev) => ({ ...prev, selectedSidebarTag: { ...item, title: `${prefix}${item.title}` } }));
+    setNavItems(prev => {
+      // deactive prev one
+      selectedIdxs.reduce((acc, cur, idx) => {
+        if (idx === selectedIdxs.length - 1 && acc[cur]) {
+          acc[cur].isActive = false;
+          return acc;
+        }
+        return acc?.[cur]?.items || [];
+      }, prev)
+
+      // active current one
+      indices.reduce((acc: NavTagItem[], cur: number, idx: number): NavTagItem[] => {
+        if (idx === indices.length - 1) {
+          acc![cur].isActive = true;
+          return acc;
+        }
+        return acc[cur].items || [];
+      }, prev);
+
+      return [...prev];
+    });
+    setSelectedIdxs(indices);
   }
 
   const onEditChange = async (newItem: NavTagItem, indices: number[], idx: number) => {
@@ -245,6 +280,22 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
 
   return (
     <Sidebar modal={false} className={cn("absolute w-full", className)}>
+      <div className="p-2">
+        <div id="1" className="w-full h-8 p-2 px-4 flex justify-between items-center cursor-pointer \
+           text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+          <div className="flex justify-start items-center gap-2">
+            <LayoutGrid className="h-4 w-4" />All Repos
+          </div>
+          {starCtx.numOfStarItems || 0}
+        </div>
+        <div id="2" className="w-full h-8 p-2 px-4 flex justify-between items-center cursor-pointer \
+          text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+          <div className="flex justify-start items-center gap-2">
+            <Bookmark className="h-4 w-4" />Untag Repos
+          </div>
+          {starCtx.numOfUntagStarItems || 0}
+        </div>
+      </div>
       <SidebarContent className="group/root-container">
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">
