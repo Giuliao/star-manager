@@ -29,8 +29,6 @@ async function* makeIterator(param: { per_page: number, page: number }) {
 }
 
 function iteratorToStream(iterator: any, req?: NextRequest) {
-
-
   return new ReadableStream({
     async pull(controller) {
 

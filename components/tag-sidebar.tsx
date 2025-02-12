@@ -3,8 +3,6 @@ import { useState, useEffect, useTransition } from "react";
 import {
   LoaderCircle,
   Plus,
-  LayoutGrid,
-  Bookmark
 } from "lucide-react"
 import {
   Sidebar,
@@ -14,6 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import { NavSidebar } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
+import { TagSidebarHeader } from "@/components/tag-sidebar-header";
 import { useStarCtx } from "@/lib/context/star";
 import { cn } from "@/lib/utils";
 import {
@@ -280,22 +279,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
 
   return (
     <Sidebar modal={false} className={cn("absolute w-full", className)}>
-      <div className="p-2">
-        <div id="1" className="w-full h-8 p-2 px-4 flex justify-between items-center cursor-pointer \
-           text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-          <div className="flex justify-start items-center gap-2">
-            <LayoutGrid className="h-4 w-4" />All Repos
-          </div>
-          {starCtx.numOfStarItems || 0}
-        </div>
-        <div id="2" className="w-full h-8 p-2 px-4 flex justify-between items-center cursor-pointer \
-          text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-          <div className="flex justify-start items-center gap-2">
-            <Bookmark className="h-4 w-4" />Untag Repos
-          </div>
-          {starCtx.numOfUntagStarItems || 0}
-        </div>
-      </div>
+      <TagSidebarHeader onNavItemClick={onNavItemClick} />
       <SidebarContent className="group/root-container">
         <SidebarGroup>
           <SidebarGroupLabel className="group/label">

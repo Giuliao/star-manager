@@ -46,7 +46,8 @@ export function SearchControl({ onInputChange, onTagChange }: Props) {
         {
           tags.map((tag: FlatTagType, i) => {
             return (
-              <div className="cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
+              <div className="animate-in fade-in slide-in-from-left-5 duration-300 \
+                cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
                 {tag.name}
                 <X
                   onClick={() => onRemoveSearchTag(tag)}

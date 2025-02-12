@@ -17,6 +17,7 @@ import { SearchControl } from "./search-control";
 import { StarListDrawer } from "./star-list-drawer";
 import { useSidebar } from "@/components/ui/sidebar"
 import { useDebounce } from "@/lib/hooks/use-debounce";
+import { TagSidebarHeaderConst } from "@/components/tag-sidebar-header";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
@@ -61,11 +62,11 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
         return { data: [] };
       }));
       const starItems = (resp.data as StarItem[]).map(initTagData) as StarItem[];
-      setStarList(starItems);
+      setStarList(prev => [...prev, ...starItems]);
       setStarCtx(prev => ({
         ...prev,
-        numOfStarItems: resp.data.length,
-        numOfUntagStarItems: starItems.filter(item => item.tags?.length === 0).length
+        numOfStarItems: (prev.numOfStarItems || 0) + resp.data.length,
+        numOfUntagStarItems: (prev.numOfUntagStarItems || 0) + starItems.filter(item => item.tags?.length === 0).length
       }));
     })()
   }, []);
@@ -77,8 +78,8 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
       setStarList(data => [...data, ...newStarItems] as StarItem[]);
       setStarCtx(prev => ({
         ...prev,
-        numOfStarItems: (starCtx.numOfStarItems || 0) + (newData as StarItem[]).length,
-        numOfUntagStarItems: (starCtx.numOfUntagStarItems || 0) + newStarItems.filter(item => !item.tags?.length).length
+        numOfStarItems: (prev.numOfStarItems || 0) + (newData as StarItem[]).length,
+        numOfUntagStarItems: (prev.numOfUntagStarItems || 0) + newStarItems.filter(item => !item.tags?.length).length
       }));
     });
   }, [newData]);
@@ -137,10 +138,22 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     }
   }, [starCtx.editedTag])
 
-  const filteredStarList = useMemo(() => starList
-    .filter((item) => !searchTag.length ||
-      searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
-    .filter(item => !searchStr || item.name.includes(searchStr)), [starList, searchStr, searchTag]);
+  const filteredStarList = useMemo(() => {
+    if (searchTag[0]?.item.id === TagSidebarHeaderConst.AllRepos) {
+      return starList.filter(item => searchStr || item.name.includes(searchStr));
+    }
+
+    if (searchTag[0]?.item.id === TagSidebarHeaderConst.UntagRepos) {
+      return starList.filter(item => !item.tags?.length)
+        .filter(item => !searchStr || item.name.includes(searchStr));
+    }
+
+    return starList
+      .filter((item) => !searchTag.length ||
+        searchTag.some((tag) => item.tags?.some(t => t.name === tag.name)))
+      .filter(item => !searchStr || item.name.includes(searchStr))
+  },
+    [starList, searchStr, searchTag]);
 
   const onSearchInputChange = useDebounce((evt: any) => {
     setSearchStr(evt?.target?.value as string);
@@ -209,7 +222,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
           return (
             <Card
               className={cn(
-                "rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
+                "animate-in duration-300 fade-in slide-in-from-top-10 rounded-lg w-full p-2 hover:border-solid hover:border-l-gray-300 hover:border-l-2  hover:cursor-pointer",
                 selectedStar?.name === item.name && selectedStar.owner.login === item.owner.login ? "border-2 border-blue-300 hover:border-blue-300" : ""
               )}
               onClick={() => onClick(item)}
@@ -237,7 +250,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
               <div className="flex flex-wrap items-center mt-2 gap-2">
                 {
                   item?.tags?.map((tag, i) => (
-                    <div className="cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
+                    <div className="animate-in fade-in slide-in-from-left-5 duration-300 cursor-text bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-lg max-w-80 group flex justify-start items-center" key={i}>
                       {tag.name}
                       <Trash2 className="transition-[width] ease-in-out duration-300 w-0 h-3.5 group-hover:w-3.5 ml-1 cursor-pointer"
                         onClick={() => onRemoveTag(tag, item)} />
