@@ -73,9 +73,9 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
       >
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton tooltip={item.title} className="group/button justify-between">
+            <SidebarMenuButton tooltip={item.title} isActive={item.isActive} className="group/button justify-between">
               <div className="[&>svg]:size-4 [&>svg]:shrink-0 flex items-center justify-start">
-                <ChevronRight className="mr-2 transition-transform duration-200 group-data-[state=open]/button:rotate-90 float-left" />
+                {item.items?.length ? <ChevronRight className="mr-2 transition-transform duration-200 invisible group-hover/root-container:visible group-data-[state=open]/button:rotate-90 float-left" /> : <span className="mr-2 size-4"></span>}
                 {item.icon && <item.icon />}
                 <span className="cursor-pointer" onClick={() => handleNavItemClick(item, indices)}>{item.title}</span>
               </div>
@@ -96,7 +96,7 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
                   className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
                   onClick={(evt) => onDeleteClick(evt, item, indices)}
                 />
-                {item.content?.length ? <span className="invisible group-hover/root-container:visible">{`${item.content.length}`}</span> : ''}
+                <span className="invisible group-hover/root-container:visible">{`${item.content?.length || 0}`}</span>
               </div>
             </SidebarMenuButton>
           </CollapsibleTrigger>
@@ -110,12 +110,14 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
                     indices={[...indices, idx]}
                     onAddChange={onAddChange}
                     onDeleteChange={onDeleteChange}
+                    onNavItemClick={onNavItemClick}
+                    onEditChange={onEditChange}
                   />
                   : <SidebarMenuSubItem key={subItem.id}>
-                    <SidebarMenuSubButton asChild>
+                    <SidebarMenuSubButton asChild isActive={subItem.isActive}>
                       <div className="group/button flex justify-between">
-                        <span className="cursor-pointer" onClick={() => handleNavItemClick(subItem, [...indices, idx])}>{subItem.title}</span>
-                        <div className="flex justify-end items-center [&>svg]:size-4 [&>svg]:shrink-0">
+                        <span className="cursor-pointer ml-2" onClick={() => handleNavItemClick(subItem, [...indices, idx])}>{subItem.title}</span>
+                        <div className="flex justify-end items-center [&>svg]:size-4 [&>svg]:shrink-0 gap-1">
                           <NavPopover onAdd={(name) => onAddClick(name, subItem, [...indices, idx])}>
                             <Plus
                               className="invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
@@ -132,7 +134,7 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
                             className="float-right invisible group-hover/button:visible hover:cursor-pointer active:animate-ping"
                             onClick={(event) => onDeleteClick(event, subItem, [...indices, idx])}
                           />
-                          {subItem.content?.length ? <span className="float-right invisible group-hover/root-container:visible">{`${subItem.content.length}`}</span> : ''}
+                          <span className="float-right invisible group-hover/root-container:visible">{`${subItem.content?.length || 0}`}</span>
                         </div>
                       </div>
                     </SidebarMenuSubButton>

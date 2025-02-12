@@ -37,6 +37,7 @@ export function NavPopover({ children, onAdd, initValue, isEdit, alignOffest }: 
         className="w-80"
         align="start"
         alignOffset={alignOffest ?? -250}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="grid gap-4">
           <div className="space-y-2">

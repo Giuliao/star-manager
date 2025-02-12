@@ -11,6 +11,8 @@ interface StarContextType {
   deletedTag?: NavTagItem[];
   selectedSidebarTag?: NavTagItem;
   editedTag?: NavTagItem;
+  numOfStarItems?: number;
+  numOfUntagStarItems?: number;
 }
 
 
