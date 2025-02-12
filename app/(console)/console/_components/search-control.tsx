@@ -14,7 +14,7 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   onTagChange?: (tags: FlatTagType[]) => void;
 }
 
-export function SearchControl({ onInputChange, onTagChange }: Props) {
+export function SearchControl({ onInputChange, onTagChange, className }: Props) {
 
   const [starCtx, setStarCtx] = useStarCtx()
   const [tags, setTags] = useState<FlatTagType[]>([])
@@ -35,7 +35,7 @@ export function SearchControl({ onInputChange, onTagChange }: Props) {
   }
 
   return (
-    <div className="w-full items-center sticky top-0 bg-white shadow-md p-2" onClick={(e) => e.stopPropagation()}>
+    <div className={cn("w-full items-center sticky top-0 bg-white shadow-md p-2", className)} onClick={(e) => e.stopPropagation()}>
       <div className="w-full flex justify-start gap-1">
         <Button variant="outline" size="icon" className="inline-flex sm:hidden" onClick={() => setOpenMobile(true)}>
           <Menu className="text-primary" />

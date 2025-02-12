@@ -130,7 +130,7 @@ export async function StarContent() {
 
 
   return (
-    <div className="w-full h-screen p-4 overflow-y-auto relative">
+    <div className="w-full h-[85vh] sm:h-screen p-4 overflow-y-auto relative">
       <MDXRemote source={mdStr}
         components={components}
         options={{
