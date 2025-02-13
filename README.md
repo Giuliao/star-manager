@@ -1,6 +1,6 @@
 # Star Manager
 
-## introduction
+## Introduction
 
 __Star Manager__ is extend of management of starred repos in Github.
 
@@ -18,7 +18,7 @@ Although there are already some of apps that have the same function. For reason 
 | __Show Content__   | ✅                 | x                 | x                 | x                                    | ✅                 |
 | __Export Tags__    | ✅                 | x                 | x                 | x                                    | x                 |
 | __Notes Repos__    | x                 | ✅                 | x                 | x                                    | x                 |
-|__AI Support__  | x                  | ✅                | x                 | x                                    | ✅               |
+|__AI Support__  | x                  | x                | x                 | x                                    | ✅               |
 
 Astralapp and Little Star is not free. I like Starflare, I think the UI is pretty good, but it dose not support data sync and is wrote by Vue2, the code repos is [here](https://github.com/nieheyong/starflare). So here comes StarManager, and I also add AI for abstracting README. All of the functions are free.
 
