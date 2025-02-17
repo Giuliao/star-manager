@@ -15,7 +15,7 @@ async function* makeIterator(param: { per_page: number, page: number }) {
     yield response.data;
     const linkHeader = response.headers.link || "";
     pagesRemaining = !!(linkHeader && linkHeader.includes(`rel=\"next\"`));
-
+    console.log("====>", linkHeader);
     if (pagesRemaining) {
       const url = linkHeader.match(nextPattern)![0];
       const perPage = parseInt(url.match(perPagePattern)![1]);
