@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
   const per_page = parseInt(params.get('per_page') || '');
   const page = parseInt(params.get('page') || '');
-  if (!isNumber(per_page) || !isNumber(page)) {
+  if (typeof per_page !== "number" || typeof page !== "number") {
     return NextResponse.json({ message: "per_page and page are required" });
   }
 
