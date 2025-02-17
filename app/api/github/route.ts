@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getStarList } from '@/lib/actions/github';
-import { isNumber } from "util";
 import { auth } from "@/auth";
 
+export const maxDuration = 30;
 
 async function* makeIterator(param: { per_page: number, page: number }) {
   let pagesRemaining = true;
