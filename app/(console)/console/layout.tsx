@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { cookies } from "next/headers";
 import {
   ResizableHandle,
@@ -6,13 +5,15 @@ import {
   ResizablePanelGroup
 } from "@/components/ui/resizable";
 import { DynamicPanel } from "@/components/dynamic-panel";
-import { TagSidebar } from "@/components/tag-sidebar";
-import { StarList } from "./_components/star-list";
 import { auth } from "@/auth";
 import { listUserTagById } from "@/lib/actions/tag";
 import { SessionUser } from "@/types/user";
 import { parseTagData } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import dynamic from "next/dynamic";
+
+const StarList = dynamic(async () => (await import("./_components/star-list")).StarList);
+const TagSidebar = dynamic(async () => (await import("@/components/tag-sidebar")).TagSidebar);
+
 
 export default async function Console({ content }: { content: React.ReactNode }) {
   const cookieStore = await cookies();
