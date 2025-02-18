@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getStarList } from '@/lib/actions/github';
-import { isNumber } from "util";
 import { auth } from "@/auth";
 
+export const maxDuration = 30;
 
 async function* makeIterator(param: { per_page: number, page: number }) {
   let pagesRemaining = true;
@@ -15,7 +15,6 @@ async function* makeIterator(param: { per_page: number, page: number }) {
     yield response.data;
     const linkHeader = response.headers.link || "";
     pagesRemaining = !!(linkHeader && linkHeader.includes(`rel=\"next\"`));
-
     if (pagesRemaining) {
       const url = linkHeader.match(nextPattern)![0];
       const perPage = parseInt(url.match(perPagePattern)![1]);
@@ -74,7 +73,7 @@ export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
   const per_page = parseInt(params.get('per_page') || '');
   const page = parseInt(params.get('page') || '');
-  if (!isNumber(per_page) || !isNumber(page)) {
+  if (typeof per_page !== "number" || typeof page !== "number") {
     return NextResponse.json({ message: "per_page and page are required" });
   }
 

@@ -18,6 +18,7 @@ import { SearchControl } from "./search-control";
 import { StarListDrawer } from "./star-list-drawer";
 import { useSidebar } from "@/components/ui/sidebar"
 import { useDebounce } from "@/lib/hooks/use-debounce";
+import { useDidUpdateEffect } from "@/lib/hooks/use-did-update-effect";
 import { TagSidebarHeaderConst } from "@/components/tag-sidebar-header";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -38,7 +39,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   const [parsedTagList] = useState(parseNavItem(initNavItems || []));
   const { isMobile } = useSidebar()
 
-  useEffect(() => {
+  useDidUpdateEffect(() => {
     document.cookie = `isMobile=${isMobile};path=/`;
     router.refresh();
   }, [isMobile])
