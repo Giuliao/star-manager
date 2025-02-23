@@ -20,6 +20,11 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import { useDidUpdateEffect } from "@/lib/hooks/use-did-update-effect";
 import { TagSidebarHeaderConst } from "@/components/tag-sidebar-header";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-store";
+import {
+  addNumOfStarItems,
+  addNumOfUntagStarItems
+} from '@/lib/store/star-slice';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
@@ -37,7 +42,8 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   const router = useRouter();
   const [tagList] = useTagList();
   const [parsedTagList] = useState(parseNavItem(initNavItems || []));
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
+  const dispatch = useAppDispatch();
 
   useDidUpdateEffect(() => {
     document.cookie = `isMobile=${isMobile};path=/`;
@@ -65,12 +71,9 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
       }));
       const starItems = (resp.data as StarItem[]).map(initTagData) as StarItem[];
       setStarList(prev => [...starItems, ...prev]);
-      setStarCtx(prev => ({
-        ...prev,
-        numOfStarItems: (prev.numOfStarItems || 0) + resp.data.length,
-        numOfUntagStarItems: (prev.numOfUntagStarItems || 0) + starItems.filter(item => item.tags?.length === 0).length
-      }));
-    })()
+      dispatch(addNumOfStarItems(starItems.length));
+      dispatch(addNumOfUntagStarItems(starItems.filter(item => !item.tags?.length).length));
+    })();
   }, []);
 
   const [newData] = useQueryGithubStarStream({ per_page: 20, page: 2 });
@@ -78,11 +81,8 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     startTransition(() => {
       const newStarItems = (newData as StarItem[]).map(initTagData);
       setStarList(data => [...data, ...newStarItems] as StarItem[]);
-      setStarCtx(prev => ({
-        ...prev,
-        numOfStarItems: (prev.numOfStarItems || 0) + (newData as StarItem[]).length,
-        numOfUntagStarItems: (prev.numOfUntagStarItems || 0) + newStarItems.filter(item => !item.tags?.length).length
-      }));
+      dispatch(addNumOfStarItems(newStarItems.length));
+      dispatch(addNumOfUntagStarItems(newStarItems.filter(item => !item.tags?.length).length));
     });
   }, [newData]);
 
