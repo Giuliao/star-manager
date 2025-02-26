@@ -28,16 +28,14 @@ export function NavSidebarOperaions({
   const onAddClick = (name: string, item: NavTagItem, indices: number[]) => {
     const newItem = {
       title: name,
-      parentId: item.id as string
+      parentId: item.id as string,
+      items: []
     };
 
-    if (item.items) {
-      item.items.push(newItem);
-    } else {
-      item.items = [newItem];
-    }
-
-    onAddChange?.(item, newItem, indices);
+    onAddChange?.({
+      ...item,
+      items: [...(item.items || []), newItem]
+    }, newItem, indices);
   }
   const onDeleteClick = (event: React.MouseEvent<SVGElement>, item: NavTagItem, indices: number[]) => {
     event.preventDefault();

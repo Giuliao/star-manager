@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import {
   ChevronRight,
 } from "lucide-react"
@@ -29,38 +30,11 @@ interface Props {
   onEditChange?: (changeItem: NavTagItem, indices: number[]) => void;
 }
 
-export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavItemClick, onEditChange }: Props) {
-  const onAddClick = (name: string, item: NavTagItem, indices: number[]) => {
-    const newItem = {
-      title: name,
-      parentId: item.id as string
-    };
-
-    if (item.items) {
-      item.items.push(newItem);
-    } else {
-      item.items = [newItem];
-    }
-
-    onAddChange?.(item, newItem, indices);
-  }
-  const onDeleteClick = (event: React.MouseEvent<SVGElement>, item: NavTagItem, indices: number[]) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    onDeleteChange?.(item, indices);
-  }
-
+export const NavSidebar = memo(function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavItemClick, onEditChange }: Props) {
   const handleNavItemClick = (item: NavTagItem, indices: number[]) => {
     onNavItemClick?.(item, indices);
   }
 
-  const handleEditTitle = (name: string, item: NavTagItem, indices: number[]) => {
-    onEditChange?.({
-      ...item,
-      title: name
-    }, indices);
-  }
   return (
     <SidebarMenu>
       <Collapsible
@@ -120,4 +94,4 @@ export function NavSidebar({ item, onAddChange, indices, onDeleteChange, onNavIt
       </Collapsible>
     </SidebarMenu>
   )
-}
+});

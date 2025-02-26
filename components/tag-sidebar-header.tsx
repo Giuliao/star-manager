@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { LayoutGrid, Bookmark, Tag } from "lucide-react";
 import type { NavTagItem } from "@/types/tag";
 import { SidebarMenuButton, SidebarMenu } from "@/components/ui/sidebar";
@@ -13,7 +13,7 @@ export enum TagSidebarHeaderConst {
   UntagRepos = "Untag Repos"
 }
 
-export function TagSidebarHeader({ onNavItemClick }: Props) {
+export const TagSidebarHeader = memo(function TagSidebarHeader({ onNavItemClick }: Props) {
   const numOfStarItems = useAppSelector(selectedNumOfStarItems);
   const numOfUntagStarItems = useAppSelector(selectedNumOfUntagStarItems);
 
@@ -51,4 +51,4 @@ export function TagSidebarHeader({ onNavItemClick }: Props) {
       }
     </SidebarMenu>
   )
-}
+});

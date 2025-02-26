@@ -28,6 +28,7 @@ export const StarSlice = createSlice({
   initialState,
   reducers: {
     addTagList: (state, action: PayloadAction<NavTagItem[]>) => {
+      state.tagList = action.payload;
     },
     addNumOfStarItems: (state, action: PayloadAction<number>) => {
       state.numOfStarItems = (state.numOfStarItems || 0) + action.payload;
@@ -38,10 +39,32 @@ export const StarSlice = createSlice({
     setSelectedStar: (state, action: PayloadAction<StarItem>) => {
       state.selectedStar = action.payload;
     },
+    setSelectedTag: (state, action: PayloadAction<FlatTagType>) => {
+      state.selectedTag = action.payload;
+    },
+    setIsDeleteTag: (state, action: PayloadAction<boolean>) => {
+      state.isDeleteTag = action.payload;
+    },
+    setDeletedTag: (state, action: PayloadAction<NavTagItem[] | undefined>) => {
+      state.deletedTag = action.payload;
+    },
+    setSelectedSidebarTag: (state, action: PayloadAction<NavTagItem | undefined>) => {
+      state.selectedSidebarTag = action.payload;
+    },
+    setEditedTag: (state, action: PayloadAction<NavTagItem>) => {
+      state.editedTag = action.payload;
+    }
   },
   selectors: {
+    selectedTagList: (state) => state.tagList,
     selectedNumOfStarItems: (state) => state.numOfStarItems,
     selectedNumOfUntagStarItems: (state) => state.numOfUntagStarItems,
+    selectedStar: (state) => state.selectedStar,
+    selectedTag: (state) => state.selectedTag,
+    selectedIsDeleteTag: (state) => state.isDeleteTag,
+    selectedDeletedTag: (state) => state.deletedTag,
+    selectedSidebarTag: (state) => state.selectedSidebarTag,
+    selectedEditedTag: (state) => state.editedTag
   }
 })
 
@@ -50,12 +73,24 @@ export const {
   addTagList,
   addNumOfStarItems,
   addNumOfUntagStarItems,
-  setSelectedStar
+  setSelectedStar,
+  setSelectedTag,
+  setIsDeleteTag,
+  setDeletedTag,
+  setSelectedSidebarTag,
+  setEditedTag
 } = StarSlice.actions;
 
 
 const injectedStarSlice = StarSlice.injectInto(rootReducer);
 export const {
   selectedNumOfUntagStarItems,
-  selectedNumOfStarItems
+  selectedNumOfStarItems,
+  selectedStar,
+  selectedTag,
+  selectedTagList,
+  selectedIsDeleteTag,
+  selectedDeletedTag,
+  selectedSidebarTag,
+  selectedEditedTag
 } = injectedStarSlice.selectors;

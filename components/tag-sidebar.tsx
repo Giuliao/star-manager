@@ -1,5 +1,11 @@
 "use client";
-import { useState, useEffect, useTransition } from "react";
+import {
+  useState,
+  useEffect,
+  useTransition,
+  useCallback,
+  memo
+} from "react";
 import {
   LoaderCircle,
   Plus,
@@ -13,7 +19,6 @@ import {
 import { NavSidebar } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
 import { TagSidebarHeader } from "@/components/tag-sidebar-header";
-import { useStarCtx } from "@/lib/context/star";
 import { cn } from "@/lib/utils";
 import {
   createUserTag,
@@ -24,7 +29,16 @@ import {
 } from "@/lib/actions/tag";
 import type { SessionUser } from "@/types/user";
 import type { NavTagItem } from "@/types/tag";
-
+import {
+  addTagList,
+  selectedStar as _ctxSelectedStar,
+  selectedTag as _ctxSelectedTag,
+  selectedIsDeleteTag as _ctxSelectedIsDeleteTag,
+  setDeletedTag,
+  setEditedTag,
+  setSelectedSidebarTag,
+} from "@/lib/store/star-slice";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-store";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   sessionUser: SessionUser;
@@ -33,32 +47,35 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
 
 export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   const [navItems, setNavItems] = useState<NavTagItem[]>(initNavItems || []);
-  const [starCtx, setStarCtx] = useStarCtx();
   const [pending, startTransition] = useTransition();
   const [selectedIdxs, setSelectedIdxs] = useState<number[]>([]);
+  const dispath = useAppDispatch();
+  const ctxSelectedStar = useAppSelector(_ctxSelectedStar);
+  const ctxSelectedTag = useAppSelector(_ctxSelectedTag);
+  const ctxIsDeleteTag = useAppSelector(_ctxSelectedIsDeleteTag);
 
   useEffect(() => {
-    setStarCtx(prev => ({ ...prev, tagList: navItems }));
+    dispath(addTagList(navItems));
   }, [navItems])
 
 
   useEffect(() => {
-    if (starCtx.selectedTag && starCtx.selectedStar) {
-      if (!starCtx.isDeleteTag && starCtx.selectedTag.item.content
-        ?.some(c => c === `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`)) {
+    if (ctxSelectedTag && ctxSelectedStar) {
+      if (!ctxIsDeleteTag && ctxSelectedTag.item.content
+        ?.some(c => c === `${ctxSelectedStar!.owner.login}/${ctxSelectedStar!.name}`)) {
         return;
       }
 
-      let tag = starCtx.selectedTag;
+      let tag = ctxSelectedTag;
       setNavItems(prev => {
         let newNavItems = [...prev];
         tag.indices.reduce((acc: NavTagItem[], cur: number, idx: number) => {
           if (idx === tag.indices.length - 1) {
-            if (starCtx.isDeleteTag) {
+            if (ctxIsDeleteTag) {
               acc[cur] = {
                 ...acc[cur],
                 content: [
-                  ...(acc[cur].content?.filter(c => c !== `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`
+                  ...(acc[cur].content?.filter(c => c !== `${ctxSelectedStar!.owner.login}/${ctxSelectedStar!.name}`
                   ) || []),
                 ]
               };
@@ -67,7 +84,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
                 ...acc[cur],
                 content: [
                   ...(acc[cur].content || []),
-                  `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`
+                  `${ctxSelectedStar!.owner.login}/${ctxSelectedStar!.name}`
                 ]
               };
             }
@@ -91,9 +108,9 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
             sessionUser.dbId,
             tag.item.id as string,
             {
-              content: starCtx.isDeleteTag
-                ? acc[cur].content?.filter(c => c !== `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`)
-                : [...(acc[cur].content || []), `${starCtx.selectedStar!.owner.login}/${starCtx.selectedStar!.name}`]
+              content: ctxIsDeleteTag
+                ? acc[cur].content?.filter(c => c !== `${ctxSelectedStar!.owner.login}/${ctxSelectedStar!.name}`)
+                : [...(acc[cur].content || []), `${ctxSelectedStar!.owner.login}/${ctxSelectedStar!.name}`]
             }
           )
           return [];
@@ -102,7 +119,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       }, navItems);
 
     }
-  }, [starCtx.selectedTag])
+  }, [ctxSelectedTag])
 
 
   const onAddRootTag = (name: string) => {
@@ -120,7 +137,7 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       }))?.[0];
 
       setNavItems(prev => {
-        return [...prev, { title: name || "new tag", id: result.id }] as NavTagItem[];
+        return [...prev, { title: name || "new tag", id: result.id, items: [] }] as NavTagItem[];
       });
     });
   }
@@ -142,22 +159,34 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       }))?.[0];
       newItem.id = result.id;
 
-      setNavItems(prev => {
+      setNavItems(items => {
+        let prev = [...items];
         if (indices.length === 0) {
           prev[idx] = item;
         } else {
+          prev[idx] = {
+            ...prev[idx],
+            items: [...(prev[idx].items || [])],
+          };
+
           indices.reduce((acc, cur, idx) => {
             if (idx === indices.length - 1) {
               acc![cur] = item;
               return acc
             }
+            acc![cur] = {
+              ...acc![cur],
+              items: [...(acc![cur].items || [])],
+            };
+
             return acc![cur]?.items;
           }, prev[idx].items);
         };
-        return [...prev];
+        return prev;
       });
     });
   }
+
   const onDeleteChange = (item: NavTagItem, indices: number[], idx: number) => {
     setNavItems(prev => {
       if (indices.length === 0) {
@@ -196,15 +225,13 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       return result;
     }
 
-    setStarCtx(prev => ({
-      ...prev,
-      deletedTag: getDeleteTag(item)
-    }));
+    dispath(setDeletedTag(getDeleteTag(item)));
 
     // database action
     deleteUserTagById(sessionUser.dbId, item.id as string);
 
   }
+
   const onNavItemClick = (item: NavTagItem, indices: number[]) => {
     let prefix = '';
     indices.reduce((acc: NavTagItem[], cur: number, idx: number) => {
@@ -215,23 +242,33 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       return acc[cur].items as NavTagItem[];
     }, navItems);
 
-    setStarCtx((prev) => ({ ...prev, selectedSidebarTag: { ...item, title: `${prefix}${item.title}` } }));
-    setNavItems(prev => {
+    dispath(setSelectedSidebarTag({ ...item, title: `${prefix}${item.title}` }));
+    setNavItems(items => {
+      const prev = [...items];
       // deactive prev one
       selectedIdxs.reduce((acc, cur, idx) => {
         if (idx === selectedIdxs.length - 1 && acc[cur]) {
-          acc[cur].isActive = false;
+          acc[cur] = {
+            ...acc[cur],
+            isActive: false
+          };
+
           return acc;
         }
+        acc = [...acc.slice(0, cur), { ...acc[cur], items: [...(acc[cur].items || [])] }, ...acc.slice(cur)]
         return acc?.[cur]?.items || [];
       }, prev)
 
       // active current one
       indices.reduce((acc: NavTagItem[], cur: number, idx: number): NavTagItem[] => {
         if (idx === indices.length - 1) {
-          acc![cur].isActive = true;
+          acc[cur] = {
+            ...acc[cur],
+            isActive: true
+          }
           return acc;
         }
+        acc = [...acc.slice(0, cur), { ...acc[cur], items: [...(acc[cur].items || [])] }, ...acc.slice(cur)]
         return acc[cur].items || [];
       }, prev);
 
@@ -256,25 +293,34 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       content: [...(newItem.content || [])],
     });
 
-    setNavItems(prev => {
+    setNavItems(items => {
+      const prev = [...items];
       if (indices.length === 0) {
         prev[idx] = newItem;
       } else {
+        prev[idx] = {
+          ...prev[idx],
+          items: [...(prev[idx].items || [])],
+        };
+
         indices.reduce((acc, cur, idx) => {
           if (idx === indices.length - 1) {
             acc![cur] = newItem;
             return acc
           }
+
+          acc![cur] = {
+            ...acc![cur],
+            items: [...(acc![cur].items || [])],
+          };
+
           return acc![cur]?.items;
         }, prev[idx].items);
       };
-      return [...prev];
+      return prev;
     });
 
-    setStarCtx(prev => ({
-      ...prev,
-      editedTag: newItem
-    }));
+    dispath(setEditedTag(newItem));
   }
 
   return (

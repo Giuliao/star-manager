@@ -4,10 +4,14 @@ import { X, Menu } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useStarCtx } from "@/lib/context/star";
 import { parseNavItem } from "@/lib/hooks/use-taglist";
 import type { FlatTagType } from "@/types/tag";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks/use-store";
+import {
+  selectedSidebarTag as _ctxSelectedSidebarTag,
+  setSelectedSidebarTag
+} from "@/lib/store/star-slice";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   onInputChange?: (evt: ChangeEvent<HTMLInputElement>) => void;
@@ -16,18 +20,19 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
 
 export function SearchControl({ onInputChange, onTagChange, className }: Props) {
 
-  const [starCtx, setStarCtx] = useStarCtx()
   const [tags, setTags] = useState<FlatTagType[]>([])
   const { setOpenMobile } = useSidebar()
+  const ctxSelectedSidebarTag = useAppSelector(_ctxSelectedSidebarTag);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (starCtx.selectedSidebarTag) {
-      const result = parseNavItem([starCtx.selectedSidebarTag]);
+    if (ctxSelectedSidebarTag) {
+      const result = parseNavItem([ctxSelectedSidebarTag]);
       setTags(result);
       onTagChange?.(result);
-      setStarCtx(prev => ({ ...prev, selectedSidebarTag: undefined }));
+      dispatch(setSelectedSidebarTag(undefined));
     }
-  }, [starCtx.selectedSidebarTag])
+  }, [ctxSelectedSidebarTag])
 
   const onRemoveSearchTag = (item: FlatTagType) => {
     setTags(prev => prev.filter(data => data.name !== item.name));
