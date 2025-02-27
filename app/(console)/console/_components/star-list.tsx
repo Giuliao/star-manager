@@ -12,7 +12,6 @@ import { getStarList } from "@/lib/actions/github";
 import type { StarItem } from "@/types/github";
 import type { FlatTagType, NavTagItem } from "@/types/tag";
 import { useQueryGithubStarStream } from "@/lib/hooks/query";
-import { useStarCtx } from "@/lib/context/star";
 import { useTagList, parseNavItem } from "@/lib/hooks/use-taglist";
 import { SearchControl } from "./search-control";
 import { StarListDrawer } from "./star-list-drawer";
@@ -20,6 +19,18 @@ import { useSidebar } from "@/components/ui/sidebar"
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import { useDidUpdateEffect } from "@/lib/hooks/use-did-update-effect";
 import { TagSidebarHeaderConst } from "@/components/tag-sidebar-header";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-store";
+import {
+  addNumOfStarItems,
+  addNumOfUntagStarItems,
+  selectedStar as _ctxSelectedStar,
+  selectedDeletedTag as _ctxDeletedTag,
+  selectedEditedTag as _ctxEditedTag,
+  setSelectedStar as setCtxSelectedStar,
+  setSelectedTag as setCtxSelectedTag,
+  setIsDeleteTag as setCtxIsDeleteTag,
+  setDeletedTag as setCtxDeletedTag,
+} from '@/lib/store/star-slice';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
@@ -33,11 +44,14 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   const [searchTag, setSearchTag] = useState<FlatTagType[]>([]);
   const [pending, startTransition] = useTransition();
   const [selectedStar, setSelectedStar] = useState<StarItem>();
-  const [starCtx, setStarCtx] = useStarCtx();
   const router = useRouter();
   const [tagList] = useTagList();
   const [parsedTagList] = useState(parseNavItem(initNavItems || []));
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
+  const dispatch = useAppDispatch();
+  const ctxSelectedStar = useAppSelector(_ctxSelectedStar);
+  const ctxDeletedTag = useAppSelector(_ctxDeletedTag);
+  const ctxEditedTag = useAppSelector(_ctxEditedTag);
 
   useDidUpdateEffect(() => {
     document.cookie = `isMobile=${isMobile};path=/`;
@@ -65,12 +79,9 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
       }));
       const starItems = (resp.data as StarItem[]).map(initTagData) as StarItem[];
       setStarList(prev => [...starItems, ...prev]);
-      setStarCtx(prev => ({
-        ...prev,
-        numOfStarItems: (prev.numOfStarItems || 0) + resp.data.length,
-        numOfUntagStarItems: (prev.numOfUntagStarItems || 0) + starItems.filter(item => item.tags?.length === 0).length
-      }));
-    })()
+      dispatch(addNumOfStarItems(starItems.length));
+      dispatch(addNumOfUntagStarItems(starItems.filter(item => !item.tags?.length).length));
+    })();
   }, []);
 
   const [newData] = useQueryGithubStarStream({ per_page: 20, page: 2 });
@@ -78,22 +89,19 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     startTransition(() => {
       const newStarItems = (newData as StarItem[]).map(initTagData);
       setStarList(data => [...data, ...newStarItems] as StarItem[]);
-      setStarCtx(prev => ({
-        ...prev,
-        numOfStarItems: (prev.numOfStarItems || 0) + (newData as StarItem[]).length,
-        numOfUntagStarItems: (prev.numOfUntagStarItems || 0) + newStarItems.filter(item => !item.tags?.length).length
-      }));
+      dispatch(addNumOfStarItems(newStarItems.length));
+      dispatch(addNumOfUntagStarItems(newStarItems.filter(item => !item.tags?.length).length));
     });
   }, [newData]);
 
   useEffect(() => {
-    if (starCtx.deletedTag) {
+    if (ctxDeletedTag) {
       setStarList(prev => {
         return prev.map((item) => {
           let newItem = {
             ...item
           }
-          starCtx.deletedTag?.forEach((tag) => {
+          ctxDeletedTag?.forEach((tag) => {
             if (item.tags?.some(t => t.item.id === tag.id)) {
               newItem = {
                 ...newItem,
@@ -105,16 +113,16 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
           })
           return newItem;
         })
-      })
-      setStarCtx(prevCtx => ({ ...prevCtx, deletedTag: undefined }));
+      });
+      dispatch(setCtxDeletedTag(undefined));
     }
-  }, [starCtx.deletedTag]);
+  }, [ctxDeletedTag]);
 
   useEffect(() => {
-    if (starCtx.editedTag) {
+    if (ctxEditedTag) {
       setStarList(prev => {
         return prev.map(item => {
-          const idx = item.tags?.findIndex((tag) => tag.item.id === starCtx.editedTag?.id);
+          const idx = item.tags?.findIndex((tag) => tag.item.id === ctxEditedTag?.id);
           if (idx !== undefined && idx !== null && idx >= 0) {
             const originTagItem = item.tags![idx];
             const lastIdx = originTagItem.name.lastIndexOf(item.tags![idx].item.title);
@@ -125,9 +133,9 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
                 ...(item.tags?.slice(0, idx) || []),
                 {
                   ...originTagItem,
-                  name: `${originTagItem.name.slice(0, lastIdx)}${starCtx.editedTag?.title}`,
+                  name: `${originTagItem.name.slice(0, lastIdx)}${ctxEditedTag?.title}`,
                   item: {
-                    ...starCtx.editedTag
+                    ...ctxEditedTag
                   }
                 },
                 ...(item.tags?.slice(idx + 1) || [])
@@ -138,7 +146,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
         }) as StarItem[];
       });
     }
-  }, [starCtx.editedTag])
+  }, [ctxEditedTag])
 
   const filteredStarList = useMemo(() => {
     if (searchTag[0]?.item.id === TagSidebarHeaderConst.AllRepos) {
@@ -162,11 +170,11 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   }, 500)
 
   const onClick = (item: StarItem) => {
-    if (starCtx.selectedStar?.name === item.name && starCtx.selectedStar.owner.login === item.owner.login) {
+    if (ctxSelectedStar?.name === item.name && ctxSelectedStar.owner.login === item.owner.login) {
       return;
     }
     setSelectedStar(item);
-    setStarCtx(prevCtx => ({ ...prevCtx, selectedStar: item }));
+    dispatch(setCtxSelectedStar(item));
     document.cookie = `owner=${item.owner.login};path=/`;
     document.cookie = `repo=${item.name};path=/`;
     router.replace("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));
@@ -184,12 +192,9 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
       return newStarList;
     });
 
-    setStarCtx(prevCtx => ({
-      ...prevCtx,
-      selectedStar: { ...prevCtx.selectedStar, tags: [...(prevCtx.selectedStar?.tags || []), item] } as StarItem,
-      selectedTag: item,
-      isDeleteTag: false
-    }));
+    dispatch(setCtxSelectedStar({ ...ctxSelectedStar, tags: [...(ctxSelectedStar?.tags || []), item] } as StarItem));
+    dispatch(setCtxSelectedTag(item));
+    dispatch(setCtxIsDeleteTag(false));
   }
 
   const onRemoveTag = (item: FlatTagType, starItem: StarItem) => {
@@ -204,13 +209,9 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
       return newStarList;
     });
 
-    setStarCtx(prevCtx => ({
-      ...prevCtx,
-      selectedStar: { ...prevCtx.selectedStar, tags: [...(prevCtx.selectedStar?.tags?.filter(t => t.name !== item.name) || [])] } as StarItem,
-      selectedTag: item,
-      isDeleteTag: true
-    }));
-
+    dispatch(setCtxSelectedStar({ ...ctxSelectedStar, tags: [...(ctxSelectedStar?.tags?.filter(t => t.name !== item.name) || [])] } as StarItem));
+    dispatch(setCtxSelectedTag(item));
+    dispatch(setCtxIsDeleteTag(true));
   }
 
 

@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useStarCtx } from "@/lib/context/star";
 import type { NavTagItem, FlatTagType } from "@/types/tag";
+
+import { useAppSelector } from "@/lib/hooks/use-store";
+import { selectedTagList } from "@/lib/store/star-slice";
 
 export function parseNavItem(navitems: NavTagItem[], prefix: string = "", indices: number[] = []) {
   const results: FlatTagType[] = [];
@@ -22,12 +24,12 @@ export function parseNavItem(navitems: NavTagItem[], prefix: string = "", indice
 
 
 export function useTagList() {
-  const [starCtx] = useStarCtx();
   const [flatTag, setFlatTag] = useState<FlatTagType[]>([]);
+  const tagList = useAppSelector(selectedTagList);
 
   useEffect(() => {
-    setFlatTag(parseNavItem(starCtx.tagList));
-  }, [starCtx.tagList])
+    setFlatTag(parseNavItem(tagList));
+  }, [tagList])
 
 
   return [flatTag, setFlatTag];

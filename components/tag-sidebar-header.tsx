@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { LayoutGrid, Bookmark, Tag } from "lucide-react";
 import type { NavTagItem } from "@/types/tag";
 import { SidebarMenuButton, SidebarMenu } from "@/components/ui/sidebar";
-import { useStarCtx } from "@/lib/context/star";
+import { selectedNumOfUntagStarItems, selectedNumOfStarItems } from "@/lib/store/star-slice";
+import { useAppSelector } from "@/lib/hooks/use-store";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   onNavItemClick?: (item: NavTagItem, indices: number[]) => void
@@ -12,8 +13,10 @@ export enum TagSidebarHeaderConst {
   UntagRepos = "Untag Repos"
 }
 
-export function TagSidebarHeader({ onNavItemClick }: Props) {
-  const [starCtx] = useStarCtx();
+export const TagSidebarHeader = memo(function TagSidebarHeader({ onNavItemClick }: Props) {
+  const numOfStarItems = useAppSelector(selectedNumOfStarItems);
+  const numOfUntagStarItems = useAppSelector(selectedNumOfUntagStarItems);
+
   const [sidebarHeaderList, setSidebarHeaderList] = useState<NavTagItem[]>([
     {
       id: TagSidebarHeaderConst.AllRepos,
@@ -42,10 +45,10 @@ export function TagSidebarHeader({ onNavItemClick }: Props) {
             <div className="flex justify-start items-center gap-2">
               {item.icon && <item.icon className="size-4" />}{item.title}
             </div>
-            {item.id === 'All Repos' ? starCtx.numOfStarItems || 0 : starCtx.numOfUntagStarItems || 0}
+            {item.id === 'All Repos' ? numOfStarItems || 0 : numOfUntagStarItems || 0}
           </SidebarMenuButton>
         ))
       }
     </SidebarMenu>
   )
-}
+});
