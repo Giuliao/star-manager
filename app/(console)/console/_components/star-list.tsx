@@ -177,7 +177,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     dispatch(setCtxSelectedStar(item));
     document.cookie = `owner=${item.owner.login};path=/`;
     document.cookie = `repo=${item.name};path=/`;
-    router.replace("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));
+    router.push("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));
   };
 
 
