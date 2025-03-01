@@ -30,6 +30,7 @@ import {
   setSelectedTag as setCtxSelectedTag,
   setIsDeleteTag as setCtxIsDeleteTag,
   setDeletedTag as setCtxDeletedTag,
+  setContentRefresh as setCtxContentRefresh
 } from '@/lib/store/star-slice';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
@@ -43,6 +44,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
   const [searchStr, setSearchStr] = useState("");
   const [searchTag, setSearchTag] = useState<FlatTagType[]>([]);
   const [pending, startTransition] = useTransition();
+  const [refreshing, startRefreshing] = useTransition();
   const [selectedStar, setSelectedStar] = useState<StarItem>();
   const router = useRouter();
   const [tagList] = useTagList();
@@ -177,9 +179,13 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     dispatch(setCtxSelectedStar(item));
     document.cookie = `owner=${item.owner.login};path=/`;
     document.cookie = `repo=${item.name};path=/`;
-    router.push("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));
+    startRefreshing(() => {
+      router.push("/console/" + encodeURIComponent(`${item.owner.login}/${item.name}`));
+    });
   };
-
+  useEffect(() => {
+    dispatch(setCtxContentRefresh(refreshing));
+  }, [refreshing]);
 
   const onAddTag = (item: FlatTagType, starItem: StarItem) => {
     const idx = starList.findIndex((item) => item.id === starItem.id);

@@ -14,7 +14,7 @@ export interface StarState {
   editedTag?: NavTagItem;
   numOfStarItems?: number;
   numOfUntagStarItems?: number;
-
+  contentRefresh?: boolean; // which switching content trigger refresh loading immediately
 }
 
 // Define the initial state using that type
@@ -53,6 +53,9 @@ export const StarSlice = createSlice({
     },
     setEditedTag: (state, action: PayloadAction<NavTagItem>) => {
       state.editedTag = action.payload;
+    },
+    setContentRefresh: (state, action: PayloadAction<boolean>) => {
+      state.contentRefresh = action.payload;
     }
   },
   selectors: {
@@ -64,7 +67,8 @@ export const StarSlice = createSlice({
     selectedIsDeleteTag: (state) => state.isDeleteTag,
     selectedDeletedTag: (state) => state.deletedTag,
     selectedSidebarTag: (state) => state.selectedSidebarTag,
-    selectedEditedTag: (state) => state.editedTag
+    selectedEditedTag: (state) => state.editedTag,
+    selectedContentRefresh: (state) => state.contentRefresh
   }
 })
 
@@ -78,7 +82,8 @@ export const {
   setIsDeleteTag,
   setDeletedTag,
   setSelectedSidebarTag,
-  setEditedTag
+  setEditedTag,
+  setContentRefresh
 } = StarSlice.actions;
 
 
@@ -92,5 +97,6 @@ export const {
   selectedIsDeleteTag,
   selectedDeletedTag,
   selectedSidebarTag,
-  selectedEditedTag
+  selectedEditedTag,
+  selectedContentRefresh
 } = injectedStarSlice.selectors;
