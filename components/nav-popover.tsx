@@ -7,30 +7,34 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  PopoverArrow,
+  PopoverArrow
 } from "@/components/ui/popover";
-
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   onAdd?: (name: string) => void;
   initValue?: string;
   isEdit?: boolean;
-  alignOffest?: number
+  alignOffest?: number;
 }
 
-export function NavPopover({ children, onAdd, initValue, isEdit, alignOffest }: Props) {
-
+export function NavPopover({
+  children,
+  onAdd,
+  initValue,
+  isEdit,
+  alignOffest
+}: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(initValue || "");
 
   const onAddClick = () => {
     setOpen(false);
     onAdd?.(name);
-  }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal>
-      <PopoverTrigger asChild >
+      <PopoverTrigger asChild suppressHydrationWarning>
         {children}
       </PopoverTrigger>
       <PopoverContent
@@ -38,12 +42,14 @@ export function NavPopover({ children, onAdd, initValue, isEdit, alignOffest }: 
         align="start"
         alignOffset={alignOffest ?? -250}
         onClick={(e) => e.stopPropagation()}
-      >
+        suppressHydrationWarning>
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">{isEdit ? 'Edit Tag' : 'Add Tag'}</h4>
+            <h4 className="font-medium leading-none">
+              {isEdit ? "Edit Tag" : "Add Tag"}
+            </h4>
             <p className="text-sm text-muted-foreground">
-              {isEdit ? 'modify a tag' : 'add a new tag'}
+              {isEdit ? "modify a tag" : "add a new tag"}
             </p>
           </div>
           <div className="grid gap-2">
@@ -54,17 +60,19 @@ export function NavPopover({ children, onAdd, initValue, isEdit, alignOffest }: 
                 defaultValue={initValue}
                 placeholder="please input a tag name"
                 className="col-span-2 h-8"
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div className="flex justify-end gap-4 mt-4">
-              <Button onClick={onAddClick}>{isEdit ? 'Save' : 'Add'}</Button>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={onAddClick}>{isEdit ? "Save" : "Add"}</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
             </div>
           </div>
         </div>
         <PopoverArrow className="fill-background z-10 relative" />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
