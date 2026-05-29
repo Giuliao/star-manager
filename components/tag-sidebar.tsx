@@ -7,14 +7,20 @@ import {
   memo
 } from "react";
 import {
+  CircleHelp,
+  ExternalLink,
   LoaderCircle,
   Plus,
 } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { NavSidebar } from "@/components/nav-sidebar";
 import { NavPopover } from "@/components/nav-popover";
@@ -44,6 +50,8 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   sessionUser: SessionUser;
   initNavItems?: NavTagItem[];
 }
+
+const GITHUB_ISSUES_URL = "https://github.com/Giuliao/star-manager/issues";
 
 export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
   const [navItems, setNavItems] = useState<NavTagItem[]>(initNavItems || []);
@@ -349,6 +357,24 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
           {pending && <div className="flex items-center justify-start p-2"><LoaderCircle className="animate-spin w-4 h-4" /></div>}
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Open GitHub Issues">
+              <a
+                href={GITHUB_ISSUES_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open GitHub Issues for help and feedback"
+              >
+                <CircleHelp />
+                <span>Help & Feedback</span>
+                <ExternalLink className="ml-auto opacity-60" />
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
