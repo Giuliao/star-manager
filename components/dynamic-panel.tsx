@@ -10,7 +10,9 @@ export function DynamicPanel() {
 
   useEffect(() => {
     const keydownHandler = (event: KeyboardEvent) => {
-      if (event.key === ' ' && !showPanel) {
+      const isCtrlSpace = event.ctrlKey && event.code === "Space";
+
+      if (isCtrlSpace) {
         event?.preventDefault();
         event?.stopPropagation();
         setShowPanel(true);
