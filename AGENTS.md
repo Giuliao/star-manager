@@ -84,3 +84,27 @@ npm run build
 
 For database work, also run the appropriate Drizzle command and inspect the generated migration. There is no dedicated automated test suite in the repo today, so changes to auth, tag mutations, streaming routes, or README rendering deserve a quick manual pass in the app.
 
+## Next DevTools MCP
+
+The repo includes `.mcp.json` with a `next-devtools` MCP server configuration:
+
+```json
+{
+  "mcpServers": {
+    "next-devtools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"]
+    }
+  }
+}
+```
+
+To use it for debugging:
+
+1. Start the local Next.js dev server with `bun dev` or `npm run dev`; both are fine as long as they run `next dev`.
+2. Ensure the app is on Next.js 16+, where the dev server exposes `/_next/mcp` automatically.
+3. In an MCP-capable agent, connect to the `next-devtools` server from `.mcp.json`.
+4. Call `init` first, then `nextjs_index` to discover the running dev server.
+5. Use `nextjs_call` with the discovered port and tools such as `get_errors`, `get_logs`, `get_routes`, and `get_page_metadata`.
+
+Prefer `nextjs_call`/`get_errors` over browser console scraping when diagnosing Next.js runtime, build, or hydration issues. Use browser automation only when the behavior depends on real user interaction that the Next.js runtime tools cannot see.
