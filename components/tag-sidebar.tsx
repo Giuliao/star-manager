@@ -260,7 +260,8 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       return acc[cur].items as NavTagItem[];
     }, navItems);
 
-    dispath(setSelectedSidebarTag({ ...item, title: `${prefix}${item.title}` }));
+    const { icon: _icon, ...serializableItem } = item;
+    dispath(setSelectedSidebarTag({ ...serializableItem, title: `${prefix}${item.title}` }));
     trackEvent(AnalyticsEvents.TagFilterSelected, {
       tag_id: item.id,
       tag_name: `${prefix}${item.title}`,
