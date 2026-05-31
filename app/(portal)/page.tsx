@@ -2,6 +2,7 @@ import { signIn, auth, signOut } from "@/auth";
 import { Button } from "@/components/ui/button"
 import { Github, Star, Zap, Bot, Sparkles, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 export default async function Page() {
   let session = await auth();
@@ -44,10 +45,18 @@ export default async function Page() {
                 {
                   user ?
                     <Link href="/console">
-                      <Button>Goto</Button>
+                      <Button
+                        data-track={AnalyticsEvents.ConsoleCtaClicked}
+                        data-track-area="portal"
+                      >
+                        Goto
+                      </Button>
                     </Link>
                     : <SignIn>
-                      <Button>
+                      <Button
+                        data-track={AnalyticsEvents.AuthLoginClicked}
+                        data-track-area="portal"
+                      >
                         <Github className="mr-2 h-4 w-4" />
                         Sign in with GitHub
                       </Button>
@@ -136,7 +145,12 @@ export default async function Page() {
               {
                 !user && <div className="w-full max-w-sm space-y-2">
                   <SignIn>
-                    <Button className="w-full" variant="secondary">
+                    <Button
+                      className="w-full"
+                      variant="secondary"
+                      data-track={AnalyticsEvents.AuthLoginClicked}
+                      data-track-area="portal-cta"
+                    >
                       <Github className="mr-2 h-4 w-4" />
                       Sign in with GitHub
                     </Button>

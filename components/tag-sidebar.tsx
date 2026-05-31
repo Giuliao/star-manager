@@ -39,6 +39,8 @@ import {
   setSelectedSidebarTag,
 } from "@/lib/store/star-slice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/use-store";
+import { trackEvent } from "@/lib/analytics/client";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   sessionUser: SessionUser;
@@ -139,6 +141,11 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
       setNavItems(prev => {
         return [...prev, { title: name || "new tag", id: result.id, items: [] }] as NavTagItem[];
       });
+      trackEvent(AnalyticsEvents.TagCreated, {
+        tag_id: result.id,
+        tag_name: name || "new tag",
+        tag_depth: 0
+      });
     });
   }
 
@@ -183,6 +190,12 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
           }, prev[idx].items);
         };
         return prev;
+      });
+      trackEvent(AnalyticsEvents.TagCreated, {
+        tag_id: result.id,
+        tag_name: newItem.title,
+        parent_tag_id: newItem.parentTagId,
+        tag_depth: indices.length + 1
       });
     });
   }
@@ -229,6 +242,11 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
 
     // database action
     deleteUserTagById(sessionUser.dbId, item.id as string);
+    trackEvent(AnalyticsEvents.TagDeleted, {
+      tag_id: item.id,
+      tag_name: item.title,
+      child_tag_count: item.items?.length || 0
+    });
 
   }
 
@@ -243,6 +261,11 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
     }, navItems);
 
     dispath(setSelectedSidebarTag({ ...item, title: `${prefix}${item.title}` }));
+    trackEvent(AnalyticsEvents.TagFilterSelected, {
+      tag_id: item.id,
+      tag_name: `${prefix}${item.title}`,
+      tag_depth: indices.length
+    });
     setNavItems(items => {
       const prev = [...items];
       // deactive prev one
@@ -321,6 +344,11 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
     });
 
     dispath(setEditedTag(newItem));
+    trackEvent(AnalyticsEvents.TagEdited, {
+      tag_id: newItem.id,
+      tag_name: newItem.title,
+      tag_depth: indices.length
+    });
   }
 
   return (
@@ -331,7 +359,11 @@ export function TagSidebar({ sessionUser, initNavItems, className }: Props) {
           <SidebarGroupLabel className="group/label">
             Tags
             <NavPopover onAdd={onAddRootTag} alignOffest={0} >
-              <Plus className="ml-2 hover:cursor-pointer active:animate-ping" />
+              <Plus
+                className="ml-2 hover:cursor-pointer active:animate-ping"
+                data-track="tag add root opened"
+                data-track-area="tag-sidebar"
+              />
             </NavPopover>
           </SidebarGroupLabel>
           {

@@ -12,6 +12,13 @@ import { getREADME } from "@/lib/actions/github";
 import { cn } from "@/lib/utils";
 import { PreComp } from "@/components/pre-comp";
 import { FloatTip } from "@/components/float-tip";
+import { auth } from "@/auth";
+import type { SessionUser } from "@/types/user";
+import { captureServerEvent } from "@/lib/analytics/server";
+import {
+  AnalyticsEvents,
+  getAnalyticsDistinctId
+} from "@/lib/analytics/events";
 
 export async function StarContent() {
   const cookieStore = await cookies();
@@ -42,6 +49,17 @@ export async function StarContent() {
         img: sanitizeHtml.defaults.allowedAttributes.img.concat(["align"])
       }
     });
+    const session = await auth();
+    void captureServerEvent(
+      AnalyticsEvents.ReadmeViewed,
+      getAnalyticsDistinctId((session?.user as SessionUser | undefined)?.dbId),
+      {
+        repo_full_name: `${owner}/${repo}`,
+        owner,
+        repo,
+        markdown_length: markdown.length
+      }
+    );
   } catch (error) {
     console.warn(error);
     return (
@@ -164,6 +182,8 @@ export async function StarContent() {
           "overflow-visible border-[0.5px] border-gray-300"
         )}
         markdownStr={markdown}
+        owner={owner}
+        repo={repo}
       />
     </div>
   );

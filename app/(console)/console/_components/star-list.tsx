@@ -32,6 +32,8 @@ import {
   setDeletedTag as setCtxDeletedTag,
   setContentRefresh as setCtxContentRefresh
 } from '@/lib/store/star-slice';
+import { trackEvent } from "@/lib/analytics/client";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   initNavItems?: NavTagItem[];
@@ -168,13 +170,25 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     [starList, searchStr, searchTag]);
 
   const onSearchInputChange = useDebounce((evt: any) => {
-    setSearchStr(evt?.target?.value as string);
+    const value = evt?.target?.value as string;
+    setSearchStr(value);
+    trackEvent(AnalyticsEvents.SearchSubmitted, {
+      has_query: Boolean(value),
+      query_length: value?.length || 0
+    });
   }, 500)
 
   const onClick = (item: StarItem) => {
     if (ctxSelectedStar?.name === item.name && ctxSelectedStar.owner.login === item.owner.login) {
       return;
     }
+    const repoFullName = `${item.owner.login}/${item.name}`;
+    trackEvent(AnalyticsEvents.StarSelected, {
+      repo_full_name: repoFullName,
+      owner: item.owner.login,
+      repo: item.name,
+      tag_count: item.tags?.length || 0
+    });
     setSelectedStar(item);
     dispatch(setCtxSelectedStar(item));
     document.cookie = `owner=${item.owner.login};path=/`;
@@ -192,6 +206,7 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     if (starList[idx].tags?.some((tag) => tag.name === item.name)) {
       return;
     }
+    const repoFullName = `${starItem.owner.login}/${starItem.name}`;
 
     setStarList(prev => {
       const newStarList = [...prev.slice(0, idx), { ...prev[idx], tags: [...prev[idx].tags || [], item] }, ...prev.slice(idx + 1)];
@@ -201,10 +216,18 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     dispatch(setCtxSelectedStar({ ...ctxSelectedStar, tags: [...(ctxSelectedStar?.tags || []), item] } as StarItem));
     dispatch(setCtxSelectedTag(item));
     dispatch(setCtxIsDeleteTag(false));
+    trackEvent(AnalyticsEvents.TagAssigned, {
+      repo_full_name: repoFullName,
+      owner: starItem.owner.login,
+      repo: starItem.name,
+      tag_id: item.item.id,
+      tag_name: item.name
+    });
   }
 
   const onRemoveTag = (item: FlatTagType, starItem: StarItem) => {
     const idx = starList.findIndex((item) => item.id === starItem.id);
+    const repoFullName = `${starItem.owner.login}/${starItem.name}`;
 
     setStarList(prev => {
       const newStarList = [
@@ -218,6 +241,13 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
     dispatch(setCtxSelectedStar({ ...ctxSelectedStar, tags: [...(ctxSelectedStar?.tags?.filter(t => t.name !== item.name) || [])] } as StarItem));
     dispatch(setCtxSelectedTag(item));
     dispatch(setCtxIsDeleteTag(true));
+    trackEvent(AnalyticsEvents.TagRemoved, {
+      repo_full_name: repoFullName,
+      owner: starItem.owner.login,
+      repo: starItem.name,
+      tag_id: item.item.id,
+      tag_name: item.name
+    });
   }
 
 
@@ -268,7 +298,13 @@ export function StarList({ className, initNavItems, StarContentComp }: Props) {
                     ))
                   }
                   <TagPopover tagList={tagList as FlatTagType[]} onAdd={(tag) => onAddTag(tag, item)}>
-                    <Button variant="outline" className="w-5 h-5 p-1 bg-gray-300">
+                    <Button
+                      variant="outline"
+                      className="w-5 h-5 p-1 bg-gray-300"
+                      data-track={AnalyticsEvents.TagPickerOpened}
+                      data-track-area="star-list"
+                      data-track-id={item.name}
+                    >
                       <Hash className="bg-gray-200" />
                     </Button>
                   </TagPopover>
@@ -292,4 +328,3 @@ function StarContentDrawer({ children, StarContentComp }: React.HTMLAttributes<H
   </StarListDrawer>
 
 }
-

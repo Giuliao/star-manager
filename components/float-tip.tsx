@@ -1,26 +1,34 @@
 "use client"
 import { Skeleton } from '@/components/ui/skeleton';
-import { queryOpenAI } from '@/lib/actions/ai';
 import { queryChat } from '@/lib/query/chat';
-import { cn, markdownToHtml, abortableStream, withAbort } from '@/lib/utils';
+import { cn, markdownToHtml } from '@/lib/utils';
 import { processDataStream } from 'ai';
 import { Bot } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
+import { trackEvent } from "@/lib/analytics/client";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   markdownStr: string;
+  owner?: string;
+  repo?: string;
 };
 
 
 
-export function FloatTip({ markdownStr, className }: Props) {
+export function FloatTip({ markdownStr, className, owner, repo }: Props) {
 
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const repoFullName = owner && repo ? `${owner}/${repo}` : undefined;
 
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
+    trackEvent(AnalyticsEvents.AiSummaryRequested, {
+      repo_full_name: repoFullName,
+      markdown_length: markdownStr.length
+    });
     (async () => {
       try {
         const response = await queryChat([{
@@ -39,9 +47,16 @@ export function FloatTip({ markdownStr, className }: Props) {
           },
           onErrorPart(value) {
             console.log(value);
+            trackEvent(AnalyticsEvents.AiSummaryFailed, {
+              repo_full_name: repoFullName,
+              reason: "stream-error"
+            });
           },
           onFinishMessagePart: () => {
             setLoading(false);
+            trackEvent(AnalyticsEvents.AiSummaryCompleted, {
+              repo_full_name: repoFullName
+            });
           }
         });
       } catch (e) {
@@ -49,6 +64,10 @@ export function FloatTip({ markdownStr, className }: Props) {
           console.log(e);
         } else {
           console.error(e)
+          trackEvent(AnalyticsEvents.AiSummaryFailed, {
+            repo_full_name: repoFullName,
+            reason: "request-error"
+          });
         }
       }
     })();
@@ -56,7 +75,7 @@ export function FloatTip({ markdownStr, className }: Props) {
     return () => {
       controller.abort();
     }
-  }, [])
+  }, [markdownStr, repoFullName])
 
   return (
     <div className={cn("flex flex-col gap-2 group", className)}>

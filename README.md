@@ -27,3 +27,34 @@ Astralapp and Little Star is not free. I like Starflare, I think the UI is prett
 ![screenshot1](./public/Screenshot1.png)
 
 ![screenshot2](./public/Screenshot2.png)
+
+## Analytics
+
+Star Manager can report product analytics to PostHog when these environment
+variables are configured:
+
+```bash
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+NEXT_PUBLIC_POSTHOG_UI_HOST=https://us.posthog.com
+NEXT_PUBLIC_POSTHOG_ASSET_HOST=https://us-assets.i.posthog.com
+POSTHOG_KEY=
+POSTHOG_HOST=https://us.i.posthog.com
+```
+
+`NEXT_PUBLIC_POSTHOG_KEY` enables browser pageview and interaction tracking.
+`POSTHOG_KEY` is optional and lets route handlers report server-side events
+without relying on the public key. Autocapture is disabled; only explicit
+`data-track` elements and calls through `lib/analytics` are recorded.
+
+Use the EU hosts if the PostHog project lives in the EU cloud:
+
+```bash
+NEXT_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+NEXT_PUBLIC_POSTHOG_UI_HOST=https://eu.posthog.com
+NEXT_PUBLIC_POSTHOG_ASSET_HOST=https://eu-assets.i.posthog.com
+POSTHOG_HOST=https://eu.i.posthog.com
+```
+
+After changing these values, restart `npm run dev` or redeploy so Next.js can
+rebuild the client bundle and the `/ingest` rewrites.
