@@ -10,6 +10,7 @@ import { listUserTagById } from "@/lib/actions/tag";
 import { SessionUser } from "@/types/user";
 import { parseTagData } from "@/lib/utils";
 import dynamic from "next/dynamic";
+import { AnalyticsUserIdentity } from "@/components/analytics-user-identity";
 
 const StarList = dynamic(async () => (await import("./_components/star-list")).StarList);
 const TagSidebar = dynamic(async () => (await import("@/components/tag-sidebar")).TagSidebar);
@@ -24,6 +25,7 @@ export default async function Console({ content }: { content: React.ReactNode })
 
   return (
     <main className="flex-1 flex min-h-screen w-screen flex-col items-center justify-between">
+      <AnalyticsUserIdentity user={session?.user as SessionUser} />
       <DynamicPanel />
       <ResizablePanelGroup
         direction="horizontal"

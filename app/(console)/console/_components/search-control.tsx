@@ -12,6 +12,8 @@ import {
   selectedSidebarTag as _ctxSelectedSidebarTag,
   setSelectedSidebarTag
 } from "@/lib/store/star-slice";
+import { trackEvent } from "@/lib/analytics/client";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   onInputChange?: (evt: ChangeEvent<HTMLInputElement>) => void;
@@ -37,12 +39,26 @@ export function SearchControl({ onInputChange, onTagChange, className }: Props) 
   const onRemoveSearchTag = (item: FlatTagType) => {
     setTags(prev => prev.filter(data => data.name !== item.name));
     onTagChange?.(tags.filter(data => data.name !== item.name));
+    trackEvent(AnalyticsEvents.TagFilterRemoved, {
+      tag_id: item.item.id,
+      tag_name: item.name
+    });
   }
 
   return (
     <div className={cn("w-full items-center sticky top-0 bg-white shadow-md p-2", className)} onClick={(e) => e.stopPropagation()}>
       <div className="w-full flex justify-start gap-1">
-        <Button variant="outline" size="icon" className="inline-flex sm:hidden" onClick={() => setOpenMobile(true)}>
+        <Button
+          variant="outline"
+          size="icon"
+          className="inline-flex sm:hidden"
+          onClick={() => {
+            setOpenMobile(true);
+            trackEvent(AnalyticsEvents.SidebarOpened, {
+              area: "mobile-search-control"
+            });
+          }}
+        >
           <Menu className="text-primary" />
         </Button>
         <Input placeholder="Please input repo name or description" className="w-full" onChange={onInputChange} />
