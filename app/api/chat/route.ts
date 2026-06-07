@@ -42,6 +42,21 @@ export async function POST(req: Request) {
     })
   }
 
+  if (process.env.E2E_TEST === "1") {
+    const encoder = new TextEncoder();
+
+    return new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode("E2E summary stream\n"));
+        controller.close();
+      }
+    }), {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8"
+      }
+    });
+  }
+
   try {
     const { messages } = await req.json();
     void captureServerEvent(AnalyticsEvents.AiSummaryStreamStarted, distinctId, {

@@ -1,6 +1,6 @@
 import { handlers, auth } from "@/auth"; // Referring to the auth.ts we just created
 import { NextRequest, NextResponse } from "next/server";
-const { GET: innerGet } = handlers;
+const { GET: innerGet, POST } = handlers;
 
 export async function GET(req: NextRequest) {
   if (await auth()) {
@@ -9,3 +9,5 @@ export async function GET(req: NextRequest) {
   const response = await innerGet(req);
   return response;
 }
+
+export { POST };

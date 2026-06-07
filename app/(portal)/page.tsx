@@ -187,7 +187,7 @@ function SignIn({ children }: { children: React.ReactNode }) {
     <form
       action={async () => {
         "use server";
-        await signIn("github", {
+        await signIn(process.env.E2E_TEST === "1" ? "e2e" : "github", {
           redirectTo: "/console"
         });
       }}>
