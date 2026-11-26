@@ -6,7 +6,11 @@ import { users, type CreateUserType } from "@/db/schema";
 import type { SessionUser } from '@/types/user';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [GitHub],
+  providers: [
+    GitHub({
+      issuer: "https://github.com/login/oauth",
+    }),
+  ],
   callbacks: {
     async session({ session, token }) {
       (session.user as any) = {
